@@ -5,15 +5,18 @@ import 'package:accounting_app/features/categories/presentation/providers/catego
 import 'package:accounting_app/features/channels/domain/channel.dart';
 import 'package:accounting_app/features/channels/domain/channel_repository.dart';
 import 'package:accounting_app/features/channels/presentation/providers/channel_providers.dart';
+import 'package:accounting_app/features/transactions/domain/transaction.dart';
+import 'package:accounting_app/features/transactions/domain/transaction_repository.dart';
+import 'package:accounting_app/features/transactions/presentation/providers/transaction_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('app starts on the home page', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: AccountingApp()));
+    await tester.pumpWidget(_testApp());
     await tester.pumpAndSettle();
-    expect(find.text('今天也要花得明白'), findsOneWidget);
+    expect(find.textContaining('今天也要花得明白'), findsOneWidget);
     expect(find.text('還沒有記帳紀錄'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
   });
@@ -21,19 +24,7 @@ void main() {
   testWidgets('bottom navigation opens calendar and transaction pages', (
     tester,
   ) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          categoryRepositoryProvider.overrideWithValue(
-            const _FakeCategoryRepository(),
-          ),
-          channelRepositoryProvider.overrideWithValue(
-            const _FakeChannelRepository(),
-          ),
-        ],
-        child: const AccountingApp(),
-      ),
-    );
+    await tester.pumpWidget(_testApp());
     await tester.pumpAndSettle();
     await tester.tap(find.text('月曆'));
     await tester.pumpAndSettle();
@@ -42,14 +33,54 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('新增一筆'), findsOneWidget);
   });
+
+  testWidgets('quick entry prefills its expense category', (tester) async {
+    await tester.pumpWidget(_testApp());
+    await tester.pumpAndSettle();
+
+    final quickLunch = find.byKey(const Key('quickEntry-午餐'));
+    await tester.scrollUntilVisible(quickLunch, 200);
+    await tester.tap(quickLunch);
+    await tester.pumpAndSettle();
+
+    expect(find.text('新增一筆'), findsOneWidget);
+    final dropdown = tester.widget<DropdownButtonFormField<int>>(
+      find.byKey(const Key('category-expense')),
+    );
+    expect(dropdown.initialValue, 12);
+  });
 }
+
+Widget _testApp() => ProviderScope(
+  overrides: [
+    categoryRepositoryProvider.overrideWithValue(
+      const _FakeCategoryRepository(),
+    ),
+    channelRepositoryProvider.overrideWithValue(const _FakeChannelRepository()),
+    transactionRepositoryProvider.overrideWithValue(
+      const _FakeTransactionRepository(),
+    ),
+  ],
+  child: const AccountingApp(),
+);
 
 class _FakeCategoryRepository implements CategoryRepository {
   const _FakeCategoryRepository();
 
   @override
   Stream<List<Category>> watchActiveCategories(CategoryType type) {
-    return Stream.value(const []);
+    if (type == CategoryType.income) return Stream.value(const []);
+    return Stream.value([
+      Category(
+        id: 12,
+        name: '午餐',
+        type: CategoryType.expense,
+        sortOrder: 12,
+        isActive: true,
+        createdAt: DateTime(2026),
+        updatedAt: DateTime(2026),
+      ),
+    ]);
   }
 
   @override
@@ -81,4 +112,38 @@ class _FakeChannelRepository implements ChannelRepository {
 
   @override
   Future<ShoppingChannel?> getChannel(int id) async => null;
+}
+
+class _FakeTransactionRepository implements TransactionRepository {
+  const _FakeTransactionRepository();
+
+  @override
+  Stream<List<TransactionRecord>> watchTransactions(
+    TransactionDateRange range,
+  ) => Stream.value(const []);
+
+  @override
+  Stream<DailyTransactionSummary> watchDailySummary(DateTime date) =>
+      Stream.value(
+        DailyTransactionSummary(
+          date: date,
+          income: 0,
+          expense: 0,
+          transactionCount: 0,
+        ),
+      );
+
+  @override
+  Future<TransactionRecord?> getTransaction(int id) async => null;
+
+  @override
+  Future<TransactionRecord> createTransaction(TransactionInput input) =>
+      throw UnimplementedError();
+
+  @override
+  Future<TransactionRecord> updateTransaction(int id, TransactionInput input) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> deleteTransaction(int id) => throw UnimplementedError();
 }

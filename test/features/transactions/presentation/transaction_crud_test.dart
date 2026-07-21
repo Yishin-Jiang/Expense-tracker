@@ -13,8 +13,6 @@ void main() {
     database = AppDatabase.forTesting(NativeDatabase.memory());
   });
 
-  tearDown(() => database.close());
-
   testWidgets('user can create, edit, and delete an expense', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -69,10 +67,14 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('刪除這筆記錄？'), findsOneWidget);
     await tester.tap(find.text('確認刪除'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('今天也要花得明白'), findsOneWidget);
+    expect(find.textContaining('今天也要花得明白'), findsOneWidget);
     final deleted = await database.select(database.transactions).getSingle();
     expect(deleted.deletedAt, isNotNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
   });
 }

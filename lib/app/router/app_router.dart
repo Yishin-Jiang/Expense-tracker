@@ -17,7 +17,11 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
         GoRoute(path: '/calendar', builder: (_, _) => const CalendarPage()),
         GoRoute(
           path: '/transactions/new',
-          builder: (_, _) => const TransactionFormPage(),
+          builder: (_, state) => TransactionFormPage(
+            presetCategoryId: int.tryParse(
+              state.uri.queryParameters['categoryId'] ?? '',
+            ),
+          ),
         ),
         GoRoute(
           path: '/transactions/:id',

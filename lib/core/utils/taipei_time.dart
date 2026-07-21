@@ -23,3 +23,12 @@ DateTime toUtcFromTaipei(DateTime value) {
   ).subtract(taipeiUtcOffset);
   return (start: start, end: start.add(const Duration(days: 1)));
 }
+
+({DateTime start, DateTime end}) taipeiMonthRange(DateTime date) {
+  final start = DateTime.utc(date.year, date.month).subtract(taipeiUtcOffset);
+  final nextMonth = DateTime.utc(
+    date.month == 12 ? date.year + 1 : date.year,
+    date.month == 12 ? 1 : date.month + 1,
+  ).subtract(taipeiUtcOffset);
+  return (start: start, end: nextMonth);
+}

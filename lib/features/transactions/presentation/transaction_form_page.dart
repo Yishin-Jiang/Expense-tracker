@@ -12,14 +12,19 @@ import '../domain/transaction.dart';
 import 'providers/transaction_providers.dart';
 
 class TransactionFormPage extends ConsumerWidget {
-  const TransactionFormPage({this.transactionId, super.key});
+  const TransactionFormPage({
+    this.transactionId,
+    this.presetCategoryId,
+    super.key,
+  });
 
   final int? transactionId;
+  final int? presetCategoryId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (transactionId == null) {
-      return const _TransactionEditor();
+      return _TransactionEditor(presetCategoryId: presetCategoryId);
     }
 
     return ref
@@ -41,9 +46,14 @@ class TransactionFormPage extends ConsumerWidget {
 }
 
 class _TransactionEditor extends ConsumerStatefulWidget {
-  const _TransactionEditor({super.key, this.initialTransaction});
+  const _TransactionEditor({
+    super.key,
+    this.initialTransaction,
+    this.presetCategoryId,
+  });
 
   final TransactionRecord? initialTransaction;
+  final int? presetCategoryId;
 
   @override
   ConsumerState<_TransactionEditor> createState() => _TransactionEditorState();
@@ -68,7 +78,7 @@ class _TransactionEditorState extends ConsumerState<_TransactionEditor> {
     );
     _noteController = TextEditingController(text: initial?.note ?? '');
     _type = initial?.type ?? TransactionType.expense;
-    _categoryId = initial?.categoryId;
+    _categoryId = initial?.categoryId ?? widget.presetCategoryId;
     _channelId = initial?.channelId;
     _occurredAt = initial == null
         ? toTaipeiTime(DateTime.now())
