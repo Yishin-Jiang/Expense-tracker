@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../features/analysis/presentation/analysis_page.dart';
 import '../../features/calendar/presentation/calendar_page.dart';
 import '../../features/categories/presentation/category_form_page.dart';
 import '../../features/categories/presentation/category_management_page.dart';
@@ -55,10 +56,7 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
             transactionId: int.parse(state.pathParameters['id']!),
           ),
         ),
-        GoRoute(
-          path: '/analysis',
-          builder: (_, _) => const ComingSoonPage(title: '分析'),
-        ),
+        GoRoute(path: '/analysis', builder: (_, _) => const AnalysisPage()),
         GoRoute(
           path: '/subscriptions',
           builder: (_, _) => const ComingSoonPage(title: '訂閱'),
