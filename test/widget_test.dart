@@ -1,30 +1,27 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:accounting_app/app/app.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:accounting_app/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('app starts on the home page', (tester) async {
+    await tester.pumpWidget(const ProviderScope(child: AccountingApp()));
+    await tester.pumpAndSettle();
+    expect(find.text('今天也要花得明白'), findsOneWidget);
+    expect(find.text('還沒有記帳紀錄'), findsOneWidget);
+    expect(find.byType(NavigationBar), findsOneWidget);
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('bottom navigation opens calendar and transaction pages', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const ProviderScope(child: AccountingApp()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('月曆'));
+    await tester.pumpAndSettle();
+    expect(find.text('每天的花費，一眼就知道'), findsOneWidget);
+    await tester.tap(find.text('記帳'));
+    await tester.pumpAndSettle();
+    expect(find.text('新增一筆'), findsOneWidget);
   });
 }
