@@ -13,3 +13,8 @@ final activeChannelsProvider =
     StreamProvider.autoDispose<List<ShoppingChannel>>(
       (ref) => ref.watch(channelRepositoryProvider).watchActiveChannels(),
     );
+
+final channelByIdProvider = FutureProvider.autoDispose
+    .family<ShoppingChannel?, int>(
+      (ref, id) => ref.watch(channelRepositoryProvider).getChannel(id),
+    );

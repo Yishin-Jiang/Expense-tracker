@@ -7,6 +7,21 @@ class DriftChannelRepository implements ChannelRepository {
   final db.AppDatabase _database;
 
   @override
+  Future<ShoppingChannel?> getChannel(int id) async {
+    final item = await (_database.select(
+      _database.channels,
+    )..where((row) => row.id.equals(id))).getSingleOrNull();
+    return item == null
+        ? null
+        : ShoppingChannel(
+            id: item.id,
+            code: item.code,
+            name: item.name,
+            isActive: item.isActive,
+          );
+  }
+
+  @override
   Stream<List<ShoppingChannel>> watchActiveChannels() {
     return _database.channelDao.watchActiveChannels().map(
       (items) => items

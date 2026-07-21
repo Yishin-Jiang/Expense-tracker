@@ -14,3 +14,7 @@ final activeCategoriesProvider = StreamProvider.autoDispose
       (ref, type) =>
           ref.watch(categoryRepositoryProvider).watchActiveCategories(type),
     );
+
+final categoryByIdProvider = FutureProvider.autoDispose.family<Category?, int>(
+  (ref, id) => ref.watch(categoryRepositoryProvider).getCategory(id),
+);

@@ -9,6 +9,14 @@ class DriftCategoryRepository implements CategoryRepository {
   final db.AppDatabase _database;
 
   @override
+  Future<Category?> getCategory(int id) async {
+    final item = await (_database.select(
+      _database.categories,
+    )..where((row) => row.id.equals(id))).getSingleOrNull();
+    return item == null ? null : _toDomain(item);
+  }
+
+  @override
   Stream<List<Category>> watchActiveCategories(CategoryType type) {
     return _database.categoryDao
         .watchActiveCategories(type.name)

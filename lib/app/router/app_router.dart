@@ -3,10 +3,11 @@ import 'package:go_router/go_router.dart';
 import '../../features/calendar/presentation/calendar_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/transactions/presentation/transaction_form_page.dart';
+import '../../features/transactions/presentation/transaction_detail_page.dart';
 import '../shell/app_shell.dart';
 
-final appRouter = GoRouter(
-  initialLocation: '/home',
+GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
+  initialLocation: initialLocation,
   routes: [
     ShellRoute(
       builder: (context, state, child) =>
@@ -17,6 +18,18 @@ final appRouter = GoRouter(
         GoRoute(
           path: '/transactions/new',
           builder: (_, _) => const TransactionFormPage(),
+        ),
+        GoRoute(
+          path: '/transactions/:id',
+          builder: (_, state) => TransactionDetailPage(
+            transactionId: int.parse(state.pathParameters['id']!),
+          ),
+        ),
+        GoRoute(
+          path: '/transactions/:id/edit',
+          builder: (_, state) => TransactionFormPage(
+            transactionId: int.parse(state.pathParameters['id']!),
+          ),
         ),
         GoRoute(
           path: '/analysis',

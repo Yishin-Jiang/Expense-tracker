@@ -16,7 +16,9 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final found = locations.indexWhere(location.startsWith);
+    final found = location.startsWith('/transactions')
+        ? 2
+        : locations.indexWhere(location.startsWith);
     return Scaffold(
       body: child,
       bottomNavigationBar: SafeArea(
