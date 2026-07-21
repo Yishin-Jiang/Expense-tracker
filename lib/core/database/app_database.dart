@@ -61,6 +61,14 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     with _$CategoryDaoMixin {
   CategoryDao(super.db);
 
+  Stream<List<CategoryEntry>> watchAllCategories() {
+    return (select(categories)..orderBy([
+          (row) => OrderingTerm.asc(row.sortOrder),
+          (row) => OrderingTerm.asc(row.name),
+        ]))
+        .watch();
+  }
+
   Stream<List<CategoryEntry>> watchActiveCategories(String transactionType) {
     final query = select(categories)
       ..where(
@@ -89,6 +97,15 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     return (update(categories)..where((row) => row.id.equals(id))).write(
       CategoriesCompanion(
         isActive: const Value(false),
+        updatedAt: Value(DateTime.now().toUtc()),
+      ),
+    );
+  }
+
+  Future<int> setCategoryActive(int id, bool isActive) {
+    return (update(categories)..where((row) => row.id.equals(id))).write(
+      CategoriesCompanion(
+        isActive: Value(isActive),
         updatedAt: Value(DateTime.now().toUtc()),
       ),
     );

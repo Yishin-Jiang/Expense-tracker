@@ -9,6 +9,10 @@ final categoryRepositoryProvider = Provider<CategoryRepository>(
   (ref) => DriftCategoryRepository(ref.watch(databaseProvider)),
 );
 
+final allCategoriesProvider = StreamProvider.autoDispose<List<Category>>(
+  (ref) => ref.watch(categoryRepositoryProvider).watchAllCategories(),
+);
+
 final activeCategoriesProvider = StreamProvider.autoDispose
     .family<List<Category>, CategoryType>(
       (ref, type) =>

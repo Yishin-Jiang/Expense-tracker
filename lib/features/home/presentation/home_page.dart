@@ -33,9 +33,21 @@ class HomePage extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
           children: [
-            Text(
-              '${today.month} 月 ${today.day} 日・今天也要花得明白',
-              style: Theme.of(context).textTheme.headlineMedium,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${today.month} 月 ${today.day} 日・今天也要花得明白',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                ),
+                IconButton.filledTonal(
+                  key: const Key('manageCategoriesButton'),
+                  tooltip: '管理類別',
+                  onPressed: () => context.go('/categories'),
+                  icon: const Icon(Icons.category_outlined),
+                ),
+              ],
             ),
             const SizedBox(height: 6),
             Text(

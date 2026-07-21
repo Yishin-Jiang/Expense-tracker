@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/calendar/presentation/calendar_page.dart';
+import '../../features/categories/presentation/category_form_page.dart';
+import '../../features/categories/presentation/category_management_page.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/transactions/presentation/transaction_form_page.dart';
 import '../../features/transactions/presentation/transaction_detail_page.dart';
@@ -15,6 +17,20 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
       routes: [
         GoRoute(path: '/home', builder: (_, _) => const HomePage()),
         GoRoute(path: '/calendar', builder: (_, _) => const CalendarPage()),
+        GoRoute(
+          path: '/categories',
+          builder: (_, _) => const CategoryManagementPage(),
+        ),
+        GoRoute(
+          path: '/categories/new',
+          builder: (_, _) => const CategoryFormPage(),
+        ),
+        GoRoute(
+          path: '/categories/:id/edit',
+          builder: (_, state) => CategoryFormPage(
+            categoryId: int.parse(state.pathParameters['id']!),
+          ),
+        ),
         GoRoute(
           path: '/transactions/new',
           builder: (_, state) => TransactionFormPage(

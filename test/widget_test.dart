@@ -68,6 +68,9 @@ class _FakeCategoryRepository implements CategoryRepository {
   const _FakeCategoryRepository();
 
   @override
+  Stream<List<Category>> watchAllCategories() => Stream.value(const []);
+
+  @override
   Stream<List<Category>> watchActiveCategories(CategoryType type) {
     if (type == CategoryType.income) return Stream.value(const []);
     return Stream.value([
@@ -98,6 +101,11 @@ class _FakeCategoryRepository implements CategoryRepository {
 
   @override
   Future<void> archiveCategory(int id) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> restoreCategory(int id) {
     throw UnimplementedError();
   }
 }
