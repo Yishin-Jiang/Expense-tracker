@@ -15,16 +15,21 @@ class TransactionFormPage extends ConsumerWidget {
   const TransactionFormPage({
     this.transactionId,
     this.presetCategoryId,
+    this.presetDate,
     super.key,
   });
 
   final int? transactionId;
   final int? presetCategoryId;
+  final DateTime? presetDate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (transactionId == null) {
-      return _TransactionEditor(presetCategoryId: presetCategoryId);
+      return _TransactionEditor(
+        presetCategoryId: presetCategoryId,
+        presetDate: presetDate,
+      );
     }
 
     return ref
@@ -50,10 +55,12 @@ class _TransactionEditor extends ConsumerStatefulWidget {
     super.key,
     this.initialTransaction,
     this.presetCategoryId,
+    this.presetDate,
   });
 
   final TransactionRecord? initialTransaction;
   final int? presetCategoryId;
+  final DateTime? presetDate;
 
   @override
   ConsumerState<_TransactionEditor> createState() => _TransactionEditorState();
@@ -80,9 +87,20 @@ class _TransactionEditorState extends ConsumerState<_TransactionEditor> {
     _type = initial?.type ?? TransactionType.expense;
     _categoryId = initial?.categoryId ?? widget.presetCategoryId;
     _channelId = initial?.channelId;
-    _occurredAt = initial == null
-        ? toTaipeiTime(DateTime.now())
-        : toTaipeiTime(initial.occurredAt);
+    if (initial != null) {
+      _occurredAt = toTaipeiTime(initial.occurredAt);
+    } else if (widget.presetDate != null) {
+      final now = toTaipeiTime(DateTime.now());
+      _occurredAt = DateTime(
+        widget.presetDate!.year,
+        widget.presetDate!.month,
+        widget.presetDate!.day,
+        now.hour,
+        now.minute,
+      );
+    } else {
+      _occurredAt = toTaipeiTime(DateTime.now());
+    }
   }
 
   @override

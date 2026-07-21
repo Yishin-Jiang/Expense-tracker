@@ -33,11 +33,15 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
         ),
         GoRoute(
           path: '/transactions/new',
-          builder: (_, state) => TransactionFormPage(
-            presetCategoryId: int.tryParse(
-              state.uri.queryParameters['categoryId'] ?? '',
-            ),
-          ),
+          builder: (_, state) {
+            final date = state.uri.queryParameters['date'];
+            return TransactionFormPage(
+              presetCategoryId: int.tryParse(
+                state.uri.queryParameters['categoryId'] ?? '',
+              ),
+              presetDate: date == null ? null : DateTime.tryParse(date),
+            );
+          },
         ),
         GoRoute(
           path: '/transactions/:id',
