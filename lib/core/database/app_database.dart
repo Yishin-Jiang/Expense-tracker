@@ -119,7 +119,8 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
       ..where(
         (row) =>
             row.deletedAt.isNull() &
-            row.occurredAt.isBetweenValues(start.toUtc(), end.toUtc()),
+            row.occurredAt.isBiggerOrEqualValue(start.toUtc()) &
+            row.occurredAt.isSmallerThanValue(end.toUtc()),
       )
       ..orderBy([(row) => OrderingTerm.desc(row.occurredAt)]);
     return query.watch();
@@ -139,6 +140,12 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     return update(
       transactions,
     ).replace(transaction.copyWith(updatedAt: DateTime.now().toUtc()));
+  }
+
+  Future<int> updateTransactionFields(int id, TransactionsCompanion changes) {
+    return (update(
+      transactions,
+    )..where((row) => row.id.equals(id))).write(changes);
   }
 
   Future<int> softDeleteTransaction(int id) {
