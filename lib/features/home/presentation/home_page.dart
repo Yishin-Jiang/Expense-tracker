@@ -37,10 +37,17 @@ class HomePage extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    '${today.month} 月 ${today.day} 日・今天也要花得明白',
+                    '${today.month} 月 ${today.day} 日',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
+                IconButton.filledTonal(
+                  key: const Key('transactionHistoryButton'),
+                  tooltip: '搜尋交易',
+                  onPressed: () => context.go('/transactions/history'),
+                  icon: const Icon(Icons.search),
+                ),
+                const SizedBox(width: 6),
                 IconButton.filledTonal(
                   key: const Key('manageCategoriesButton'),
                   tooltip: '管理類別',

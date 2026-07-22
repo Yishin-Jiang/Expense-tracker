@@ -9,6 +9,11 @@ final transactionRepositoryProvider = Provider<TransactionRepository>(
   (ref) => DriftTransactionRepository(ref.watch(databaseProvider)),
 );
 
+final allTransactionsProvider =
+    StreamProvider.autoDispose<List<TransactionRecord>>(
+      (ref) => ref.watch(transactionRepositoryProvider).watchAllTransactions(),
+    );
+
 final transactionsForRangeProvider = StreamProvider.autoDispose
     .family<List<TransactionRecord>, TransactionDateRange>(
       (ref, range) =>

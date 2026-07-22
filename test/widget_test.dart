@@ -19,7 +19,15 @@ void main() {
   testWidgets('app starts on the home page', (tester) async {
     await tester.pumpWidget(_testApp());
     await tester.pumpAndSettle();
-    expect(find.textContaining('今天也要花得明白'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Text &&
+            RegExp(r'^\d{1,2} 月 \d{1,2} 日$').hasMatch(widget.data ?? ''),
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('今天也要花得明白'), findsNothing);
     expect(find.text('還沒有記帳紀錄'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
   });
@@ -130,6 +138,10 @@ class _FakeChannelRepository implements ChannelRepository {
 
 class _FakeTransactionRepository implements TransactionRepository {
   const _FakeTransactionRepository();
+
+  @override
+  Stream<List<TransactionRecord>> watchAllTransactions() =>
+      Stream.value(const []);
 
   @override
   Stream<List<TransactionRecord>> watchTransactions(

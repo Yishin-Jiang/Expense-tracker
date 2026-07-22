@@ -8,6 +8,7 @@ import '../../features/subscriptions/presentation/subscription_form_page.dart';
 import '../../features/subscriptions/presentation/subscription_page.dart';
 import '../../features/transactions/presentation/transaction_form_page.dart';
 import '../../features/transactions/presentation/transaction_detail_page.dart';
+import '../../features/transactions/presentation/transaction_history_page.dart';
 import '../shell/app_shell.dart';
 
 GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
@@ -32,6 +33,10 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
           builder: (_, state) => CategoryFormPage(
             categoryId: int.parse(state.pathParameters['id']!),
           ),
+        ),
+        GoRoute(
+          path: '/transactions/history',
+          builder: (_, _) => const TransactionHistoryPage(),
         ),
         GoRoute(
           path: '/transactions/new',

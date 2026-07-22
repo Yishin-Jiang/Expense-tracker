@@ -10,6 +10,13 @@ class DriftTransactionRepository implements TransactionRepository {
   final db.AppDatabase _database;
 
   @override
+  Stream<List<TransactionRecord>> watchAllTransactions() {
+    return _database.transactionDao.watchAllTransactions().map(
+      (items) => items.map(_toDomain).toList(growable: false),
+    );
+  }
+
+  @override
   Stream<List<TransactionRecord>> watchTransactions(
     TransactionDateRange range,
   ) {

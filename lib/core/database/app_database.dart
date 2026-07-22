@@ -155,6 +155,13 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     with _$TransactionDaoMixin {
   TransactionDao(super.db);
 
+  Stream<List<TransactionEntry>> watchAllTransactions() {
+    return (select(transactions)
+          ..where((row) => row.deletedAt.isNull())
+          ..orderBy([(row) => OrderingTerm.desc(row.occurredAt)]))
+        .watch();
+  }
+
   Stream<List<TransactionEntry>> watchTransactions({
     required DateTime start,
     required DateTime end,
