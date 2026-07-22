@@ -114,7 +114,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       Icons.account_balance_wallet_outlined,
                       color: AppColors.primary,
                     ),
-                    title: const Text('學生記帳'),
+                    title: const Text('好好記帳'),
                     subtitle: version.when(
                       data: (data) => Text(
                         '版本 ${data.version}（${data.buildNumber}）',

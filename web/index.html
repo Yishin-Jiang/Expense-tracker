@@ -1,46 +1,114 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant-TW">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="適合學生與租屋族使用的個人記帳工具，資料只保存在自己的裝置中。">
+  <meta name="theme-color" content="#1A5C45">
+  <meta name="format-detection" content="telephone=no">
 
-  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="accounting_app">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="好好記帳">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>accounting_app</title>
+  <link rel="icon" type="image/png" sizes="48x48" href="app-favicon-48.png">
   <link rel="manifest" href="manifest.json">
+
+  <title>好好記帳</title>
+
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background: #F6F7F4;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      overscroll-behavior: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    #app-loading {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding:
+        env(safe-area-inset-top)
+        env(safe-area-inset-right)
+        env(safe-area-inset-bottom)
+        env(safe-area-inset-left);
+      color: #14211C;
+      background: #F6F7F4;
+      transition: opacity 180ms ease-out;
+    }
+
+    #app-loading img {
+      width: 88px;
+      height: 88px;
+      border-radius: 22px;
+    }
+
+    #app-loading strong {
+      font-size: 20px;
+      letter-spacing: 0.02em;
+    }
+
+    #app-loading span {
+      color: #616E66;
+      font-size: 14px;
+    }
+
+    #app-loading.is-ready {
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #app-loading {
+        transition: none;
+      }
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <div id="app-loading" role="status" aria-live="polite">
+    <img src="icons/app-icon-192.png" alt="">
+    <strong>好好記帳</strong>
+    <span>正在準備你的帳本</span>
+  </div>
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <noscript>好好記帳需要啟用 JavaScript 才能使用。</noscript>
+
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      const loading = document.getElementById('app-loading');
+      if (!loading) return;
+      loading.classList.add('is-ready');
+      window.setTimeout(function () {
+        loading.remove();
+      }, 200);
+    }, { once: true });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('pwa_service_worker.js').catch(function (error) {
+          console.warn('離線功能無法啟用：', error);
+        });
+      }, { once: true });
+    }
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
