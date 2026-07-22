@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
@@ -16,6 +17,7 @@ class PlatformDataFileGateway implements DataFileGateway {
         title: file.name,
         files: [XFile.fromData(file.bytes, mimeType: file.mimeType)],
         fileNameOverrides: [file.name],
+        sharePositionOrigin: const Rect.fromLTWH(0, 0, 1, 1),
       ),
     );
   }

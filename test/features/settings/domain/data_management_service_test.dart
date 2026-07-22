@@ -75,6 +75,36 @@ void main() {
     expect(after.categoryCount, before.categoryCount);
   });
 
+  test(
+    'broken relationships are rejected without replacing current data',
+    () async {
+      final categories = await database.select(database.categories).get();
+      await database
+          .into(database.transactions)
+          .insert(
+            TransactionsCompanion.insert(
+              categoryId: categories.first.id,
+              type: 'expense',
+              amount: 60,
+              occurredAt: DateTime.utc(2026, 7, 22),
+            ),
+          );
+      final backup = await service.buildBackup();
+      final document =
+          jsonDecode(utf8.decode(backup.bytes)) as Map<String, dynamic>;
+      final data = document['data'] as Map<String, dynamic>;
+      final transactions = data['transactions'] as List<dynamic>;
+      (transactions.first as Map<String, dynamic>)['categoryId'] = 999999;
+      final broken = Uint8List.fromList(utf8.encode(jsonEncode(document)));
+
+      expect(
+        () => service.restoreBackup(broken),
+        throwsA(isA<BackupFormatException>()),
+      );
+      expect(await database.select(database.transactions).get(), hasLength(1));
+    },
+  );
+
   test('CSV includes UTF-8 BOM and escapes note contents', () async {
     final categories = await database.select(database.categories).get();
     await database

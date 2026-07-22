@@ -7,6 +7,8 @@ abstract final class AppColors {
   static const muted = Color(0xFF616E66);
   static const primary = Color(0xFF1A5C45);
   static const primaryContainer = Color(0xFFC9E5D4);
+  static const secondary = Color(0xFF47725F);
+  static const secondaryContainer = Color(0xFFDDEBE3);
   static const expense = Color(0xFFD64540);
   static const expenseContainer = Color(0xFFFAE0D9);
   static const warning = Color(0xFFF5D16E);

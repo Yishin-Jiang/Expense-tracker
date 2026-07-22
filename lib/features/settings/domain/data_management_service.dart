@@ -218,6 +218,7 @@ class DataManagementService {
     List<SubscriptionEntry> subscriptions,
     List<TransactionEntry> transactions,
   ) {
+    _validateBackupMetadata(categories, channels);
     final categoryIds = _uniqueIds(categories.map((item) => item.id), '類別');
     final channelIds = _uniqueIds(channels.map((item) => item.id), '購物類型');
     _uniqueIds(subscriptions.map((item) => item.id), '訂閱');
@@ -249,6 +250,11 @@ class DataManagementService {
           transaction.amount <= 0) {
         throw const BackupFormatException('交易資料或關聯無效。');
       }
+      final category = categoryById[transaction.categoryId]!;
+      if ((transaction.note?.length ?? 0) > 500 ||
+          (category.type != 'both' && category.type != transaction.type)) {
+        throw const BackupFormatException('交易與類別的內容不一致。');
+      }
     }
     for (final subscription in subscriptions) {
       if (!categoryIds.contains(subscription.categoryId) ||
@@ -264,13 +270,56 @@ class DataManagementService {
           subscription.billingDay > 31) {
         throw const BackupFormatException('訂閱資料或關聯無效。');
       }
+      final category = categoryById[subscription.categoryId]!;
+      if (category.type == 'income' ||
+          subscription.name.trim().isEmpty ||
+          subscription.name.trim().length > 80 ||
+          (subscription.note?.length ?? 0) > 500 ||
+          subscription.nextBillingDate.isBefore(subscription.startDate) ||
+          (subscription.endDate?.isBefore(subscription.startDate) ?? false)) {
+        throw const BackupFormatException('訂閱內容或日期無效。');
+      }
+    }
+  }
+
+  static void _validateBackupMetadata(
+    List<CategoryEntry> categories,
+    List<ChannelEntry> channels,
+  ) {
+    final categoryById = {for (final item in categories) item.id: item};
+    for (final channel in channels) {
+      if (channel.code.trim().isEmpty ||
+          channel.code.trim().length > 40 ||
+          channel.name.trim().isEmpty ||
+          channel.name.trim().length > 40) {
+        throw const BackupFormatException('購物類型名稱或代碼無效。');
+      }
+    }
+    for (final category in categories) {
+      if (category.name.trim().isEmpty || category.name.trim().length > 40) {
+        throw const BackupFormatException('類別名稱無效。');
+      }
+      if (category.color != null &&
+          !RegExp(r'^#[0-9A-Fa-f]{6}$').hasMatch(category.color!)) {
+        throw const BackupFormatException('類別顏色格式無效。');
+      }
+      final parent = category.parentId == null
+          ? null
+          : categoryById[category.parentId];
+      if (parent == null) continue;
+      if (parent.type != 'both' && parent.type != category.type) {
+        throw const BackupFormatException('父子類別的收支類型不一致。');
+      }
+      if (category.isActive && !parent.isActive) {
+        throw const BackupFormatException('啟用中的子類別不能隸屬於封存類別。');
+      }
     }
   }
 
   static Set<int> _uniqueIds(Iterable<int> values, String label) {
     final list = values.toList();
     final ids = list.toSet();
-    if (ids.length != list.length) {
+    if (ids.length != list.length || ids.any((id) => id <= 0)) {
       throw BackupFormatException('$label ID 重複。');
     }
     return ids;
