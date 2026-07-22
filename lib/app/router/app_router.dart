@@ -27,14 +27,18 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
           path: '/home',
           pageBuilder: (_, state) => _tabPage(state, const HomePage()),
         ),
-        GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
+        GoRoute(
+          path: '/settings',
+          pageBuilder: (_, state) => _tabPage(state, const SettingsPage()),
+        ),
         GoRoute(
           path: '/calendar',
           pageBuilder: (_, state) => _tabPage(state, const CalendarPage()),
         ),
         GoRoute(
           path: '/categories',
-          builder: (_, _) => const CategoryManagementPage(),
+          pageBuilder: (_, state) =>
+              _tabPage(state, const CategoryManagementPage()),
         ),
         GoRoute(
           path: '/categories/new',
@@ -48,7 +52,8 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
         ),
         GoRoute(
           path: '/transactions/history',
-          builder: (_, _) => const TransactionHistoryPage(),
+          pageBuilder: (_, state) =>
+              _tabPage(state, const TransactionHistoryPage()),
         ),
         GoRoute(
           path: '/transactions/new',
