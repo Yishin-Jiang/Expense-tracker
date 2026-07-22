@@ -79,6 +79,7 @@ void main() {
     expect(headers, contains('X-Content-Type-Options: nosniff'));
 
     expect(workflow, contains("github.ref == 'refs/heads/web-pwa'"));
+    expect(workflow, contains('wranglerVersion: 4.113.0'));
     expect(workflow, contains('versions upload --preview-alias web-pwa'));
     expect(workflow, contains("github.ref == 'refs/heads/main'"));
     expect(workflow, contains('command: deploy'));
