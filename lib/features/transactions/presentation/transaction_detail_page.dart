@@ -84,7 +84,7 @@ class _DetailBody extends ConsumerWidget {
                   const Divider(height: 32),
                   _DetailRow(label: '類別', value: categoryName),
                   if (channelName != null)
-                    _DetailRow(label: '購物類型', value: channelName),
+                    _DetailRow(label: '購物管道', value: channelName),
                   _DetailRow(label: '日期', value: _formatDate(taipeiDate)),
                   _DetailRow(label: '備註', value: transaction.note ?? '沒有備註'),
                 ],

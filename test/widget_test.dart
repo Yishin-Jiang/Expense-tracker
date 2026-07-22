@@ -5,6 +5,8 @@ import 'package:accounting_app/features/categories/presentation/providers/catego
 import 'package:accounting_app/features/channels/domain/channel.dart';
 import 'package:accounting_app/features/channels/domain/channel_repository.dart';
 import 'package:accounting_app/features/channels/presentation/providers/channel_providers.dart';
+import 'package:accounting_app/features/settings/domain/data_management_service.dart';
+import 'package:accounting_app/features/settings/presentation/providers/settings_providers.dart';
 import 'package:accounting_app/features/transactions/domain/transaction.dart';
 import 'package:accounting_app/features/transactions/domain/transaction_repository.dart';
 import 'package:accounting_app/features/transactions/presentation/providers/transaction_providers.dart';
@@ -38,11 +40,36 @@ void main() {
     await tester.pumpWidget(_testApp());
     await tester.pumpAndSettle();
     await tester.tap(find.text('月曆'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('每天的花費，一眼就知道'), findsOneWidget);
+    expect(find.text('還沒有記帳紀錄'), findsNothing);
     await tester.tap(find.text('記帳'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('新增一筆'), findsOneWidget);
+    expect(find.text('每天的花費，一眼就知道'), findsNothing);
+  });
+
+  testWidgets('home utility pages open without retaining the home page', (
+    tester,
+  ) async {
+    const destinations = [
+      (Key('transactionHistoryButton'), '交易紀錄'),
+      (Key('manageCategoriesButton'), '分類管理'),
+      (Key('settingsButton'), '設定'),
+    ];
+
+    for (final destination in destinations) {
+      await tester.pumpWidget(_testApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(destination.$1));
+      await tester.pump();
+
+      expect(find.text(destination.$2), findsOneWidget);
+      expect(find.text('還沒有記帳紀錄'), findsNothing);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    }
   });
 
   testWidgets('quick entry prefills its expense category', (tester) async {
@@ -73,6 +100,16 @@ Widget _testApp() => ProviderScope(
     ),
     subscriptionRepositoryProvider.overrideWithValue(
       const _FakeSubscriptionRepository(),
+    ),
+    dataSummaryProvider.overrideWith(
+      (ref) async => const DataSummary(
+        transactionCount: 0,
+        categoryCount: 0,
+        subscriptionCount: 0,
+      ),
+    ),
+    appVersionProvider.overrideWith(
+      (ref) async => const AppVersionInfo(version: '1.0.0', buildNumber: '1'),
     ),
   ],
   child: const AccountingApp(),
@@ -133,7 +170,27 @@ class _FakeChannelRepository implements ChannelRepository {
   }
 
   @override
+  Stream<List<ShoppingChannel>> watchAllChannels() {
+    return Stream.value(const []);
+  }
+
+  @override
   Future<ShoppingChannel?> getChannel(int id) async => null;
+
+  @override
+  Future<ShoppingChannel> createChannel(ShoppingChannelInput input) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ShoppingChannel> updateChannel(int id, ShoppingChannelInput input) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setChannelActive(int id, bool active) {
+    throw UnimplementedError();
+  }
 }
 
 class _FakeTransactionRepository implements TransactionRepository {

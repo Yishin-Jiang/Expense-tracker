@@ -78,7 +78,7 @@ class _CategoryEditorState extends ConsumerState<_CategoryEditor> {
             Row(
               children: [
                 IconButton(
-                  tooltip: '返回類別管理',
+                  tooltip: '返回分類管理',
                   onPressed: () => context.go('/categories'),
                   icon: const Icon(Icons.arrow_back),
                 ),

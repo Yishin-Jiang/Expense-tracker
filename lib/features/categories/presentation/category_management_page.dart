@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/app_state_views.dart';
+import '../../channels/presentation/channel_management_view.dart';
 import '../domain/category.dart';
 import 'category_visuals.dart';
 import 'providers/category_providers.dart';
@@ -18,6 +19,7 @@ class CategoryManagementPage extends ConsumerStatefulWidget {
 
 class _CategoryManagementPageState
     extends ConsumerState<CategoryManagementPage> {
+  _ManagementSection _section = _ManagementSection.categories;
   CategoryType _type = CategoryType.expense;
 
   @override
@@ -37,15 +39,9 @@ class _CategoryManagementPageState
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  '類別管理',
+                  '分類管理',
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
-              ),
-              FilledButton.icon(
-                key: const Key('addCategoryButton'),
-                onPressed: () => context.go('/categories/new'),
-                icon: const Icon(Icons.add),
-                label: const Text('新增'),
               ),
             ],
           ),
@@ -53,49 +49,91 @@ class _CategoryManagementPageState
           Padding(
             padding: const EdgeInsets.only(left: 52),
             child: Text(
-              '停用類別不會刪除既有交易紀錄',
+              '管理記帳使用的收支類別與購物管道',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
           const SizedBox(height: 22),
-          SegmentedButton<CategoryType>(
+          SegmentedButton<_ManagementSection>(
             segments: const [
-              ButtonSegment(value: CategoryType.expense, label: Text('支出')),
-              ButtonSegment(value: CategoryType.income, label: Text('收入')),
+              ButtonSegment(
+                value: _ManagementSection.categories,
+                icon: Icon(Icons.category_outlined),
+                label: Text('收支類別'),
+              ),
+              ButtonSegment(
+                value: _ManagementSection.channels,
+                icon: Icon(Icons.storefront_outlined),
+                label: Text('購物管道'),
+              ),
             ],
-            selected: {_type},
+            selected: {_section},
             onSelectionChanged: (selection) {
-              setState(() => _type = selection.single);
+              setState(() => _section = selection.single);
             },
           ),
           const SizedBox(height: 20),
-          categories.when(
-            data: (items) {
-              final visible = items
-                  .where(
-                    (item) =>
-                        item.type == _type || item.type == CategoryType.both,
-                  )
-                  .toList();
-              if (visible.isEmpty) {
-                return AppEmptyView(
-                  title: '還沒有類別',
-                  message: '新增一個類別，讓每筆收支更容易整理。',
-                  actionLabel: '新增類別',
-                  onAction: () => context.go('/categories/new'),
-                );
-              }
-              return _CategoryList(
-                categories: visible,
-                onSetActive: _setActive,
-              );
-            },
-            loading: () => const AppLoadingView(message: '正在載入類別'),
-            error: (error, _) => AppErrorView(
-              message: '類別載入失敗：$error',
-              onRetry: () => ref.invalidate(allCategoriesProvider),
+          if (_section == _ManagementSection.channels)
+            const ChannelManagementView()
+          else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: SegmentedButton<CategoryType>(
+                    segments: const [
+                      ButtonSegment(
+                        value: CategoryType.expense,
+                        label: Text('支出'),
+                      ),
+                      ButtonSegment(
+                        value: CategoryType.income,
+                        label: Text('收入'),
+                      ),
+                    ],
+                    selected: {_type},
+                    onSelectionChanged: (selection) {
+                      setState(() => _type = selection.single);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                FilledButton.icon(
+                  key: const Key('addCategoryButton'),
+                  onPressed: () => context.go('/categories/new'),
+                  icon: const Icon(Icons.add),
+                  label: const Text('新增'),
+                ),
+              ],
             ),
-          ),
+            const SizedBox(height: 20),
+            categories.when(
+              data: (items) {
+                final visible = items
+                    .where(
+                      (item) =>
+                          item.type == _type || item.type == CategoryType.both,
+                    )
+                    .toList();
+                if (visible.isEmpty) {
+                  return AppEmptyView(
+                    title: '還沒有類別',
+                    message: '新增一個類別，讓每筆收支更容易整理。',
+                    actionLabel: '新增類別',
+                    onAction: () => context.go('/categories/new'),
+                  );
+                }
+                return _CategoryList(
+                  categories: visible,
+                  onSetActive: _setActive,
+                );
+              },
+              loading: () => const AppLoadingView(message: '正在載入類別'),
+              error: (error, _) => AppErrorView(
+                message: '類別載入失敗：$error',
+                onRetry: () => ref.invalidate(allCategoriesProvider),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -148,6 +186,8 @@ class _CategoryManagementPageState
     );
   }
 }
+
+enum _ManagementSection { categories, channels }
 
 class _CategoryList extends StatelessWidget {
   const _CategoryList({required this.categories, required this.onSetActive});

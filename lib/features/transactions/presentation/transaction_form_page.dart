@@ -116,7 +116,7 @@ class _TransactionEditorState extends ConsumerState<_TransactionEditor> {
         ? CategoryType.expense
         : CategoryType.income;
     final categories = ref.watch(activeCategoriesProvider(categoryType));
-    final channels = ref.watch(activeChannelsProvider);
+    final channels = ref.watch(allChannelsProvider);
     final editing = widget.initialTransaction != null;
 
     return SafeArea(
@@ -191,22 +191,32 @@ class _TransactionEditorState extends ConsumerState<_TransactionEditor> {
             ),
             if (_type == TransactionType.expense) ...[
               const SizedBox(height: 20),
-              Text('購物類型', style: Theme.of(context).textTheme.titleLarge),
+              Text('購物管道（選填）', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 10),
               channels.when(
-                data: (items) => Wrap(
-                  spacing: 10,
-                  children: [
-                    for (final item in items)
-                      ChoiceChip(
-                        label: Text(item.name),
-                        selected: _channelId == item.id,
-                        onSelected: (_) => setState(() => _channelId = item.id),
+                data: (items) => DropdownButtonFormField<int?>(
+                  key: const Key('channelField'),
+                  initialValue: _channelId,
+                  decoration: const InputDecoration(labelText: '選擇購物管道'),
+                  items: [
+                    const DropdownMenuItem<int?>(
+                      value: null,
+                      child: Text('不設定'),
+                    ),
+                    for (final item in items.where(
+                      (item) => item.isActive || item.id == _channelId,
+                    ))
+                      DropdownMenuItem<int?>(
+                        value: item.id,
+                        child: Text(
+                          item.isActive ? item.name : '${item.name}（已停用）',
+                        ),
                       ),
                   ],
+                  onChanged: (value) => setState(() => _channelId = value),
                 ),
                 loading: () => const LinearProgressIndicator(),
-                error: (error, _) => Text('購物類型載入失敗：$error'),
+                error: (error, _) => Text('購物管道載入失敗：$error'),
               ),
             ],
             const SizedBox(height: 20),

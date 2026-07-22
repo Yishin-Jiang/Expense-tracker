@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+
+import 'database_connection.dart';
 
 part 'app_database.g.dart';
 
@@ -143,10 +140,27 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
 class ChannelDao extends DatabaseAccessor<AppDatabase> with _$ChannelDaoMixin {
   ChannelDao(super.db);
 
+  Stream<List<ChannelEntry>> watchAllChannels() {
+    return (select(channels)..orderBy([
+          (row) => OrderingTerm.desc(row.isActive),
+          (row) => OrderingTerm.asc(row.name),
+        ]))
+        .watch();
+  }
+
   Stream<List<ChannelEntry>> watchActiveChannels() {
-    return (select(
-      channels,
-    )..where((row) => row.isActive.equals(true))).watch();
+    return (select(channels)
+          ..where((row) => row.isActive.equals(true))
+          ..orderBy([(row) => OrderingTerm.asc(row.name)]))
+        .watch();
+  }
+
+  Future<int> createChannel(ChannelsCompanion channel) {
+    return into(channels).insert(channel);
+  }
+
+  Future<int> updateChannelFields(int id, ChannelsCompanion changes) {
+    return (update(channels)..where((row) => row.id.equals(id))).write(changes);
   }
 }
 
@@ -265,7 +279,7 @@ class SubscriptionDao extends DatabaseAccessor<AppDatabase>
   daos: [CategoryDao, ChannelDao, TransactionDao, SubscriptionDao],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(openDatabaseConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
@@ -416,12 +430,4 @@ class AppDatabase extends _$AppDatabase {
       "('categories', 'channels', 'subscriptions', 'transactions')",
     );
   }
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File(p.join(directory.path, 'accounting.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
 }

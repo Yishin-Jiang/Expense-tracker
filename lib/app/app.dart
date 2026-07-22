@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme/app_theme.dart';
@@ -29,6 +30,9 @@ class _AccountingAppState extends ConsumerState<AccountingApp> {
     return MaterialApp.router(
       title: '好好記帳',
       debugShowCheckedModeBanner: false,
+      locale: const Locale('zh', 'TW'),
+      supportedLocales: const [Locale('zh', 'TW')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: AppTheme.light,
       routerConfig: _router,
     );

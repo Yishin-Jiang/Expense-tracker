@@ -38,7 +38,7 @@ class _AnalysisPageState extends ConsumerState<AnalysisPage> {
   Widget build(BuildContext context) {
     final analysis = ref.watch(analysisMonthProvider(_month));
     final categories = ref.watch(allCategoriesProvider);
-    final channels = ref.watch(activeChannelsProvider);
+    final channels = ref.watch(allChannelsProvider);
 
     return SafeArea(
       child: ListView(
@@ -173,7 +173,7 @@ class _AnalysisPageState extends ConsumerState<AnalysisPage> {
         : channels
               .where((item) => item.id == transaction.channelId)
               .firstOrNull;
-    return '${date.month}/${date.day}・${channel?.name ?? '未設定購物類型'}';
+    return '${date.month}/${date.day}・${channel?.name ?? '未設定購物管道'}';
   }
 }
 
@@ -606,12 +606,12 @@ class _ChannelAnalysis extends StatelessWidget {
     final entries = snapshot.channelExpenses.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     return _SectionCard(
-      title: '購物類型',
-      subtitle: '實體店面與網購支出比例',
+      title: '購物管道',
+      subtitle: '各購物管道支出比例',
       child: entries.isEmpty
           ? const SizedBox(
               height: 90,
-              child: Center(child: Text('本月還沒有購物類型資料')),
+              child: Center(child: Text('本月還沒有購物管道資料')),
             )
           : Column(
               children: [

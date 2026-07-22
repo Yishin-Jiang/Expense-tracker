@@ -1,25 +1,17 @@
-import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../domain/data_file_gateway.dart';
+import 'exported_file_writer.dart';
+import 'picked_file_reader.dart';
 
 class PlatformDataFileGateway implements DataFileGateway {
   const PlatformDataFileGateway();
 
   @override
   Future<void> share(ExportedDataFile file) async {
-    await SharePlus.instance.share(
-      ShareParams(
-        title: file.name,
-        files: [XFile.fromData(file.bytes, mimeType: file.mimeType)],
-        fileNameOverrides: [file.name],
-        sharePositionOrigin: const Rect.fromLTWH(0, 0, 1, 1),
-      ),
-    );
+    await writeExportedFile(file);
   }
 
   @override
@@ -35,6 +27,6 @@ class PlatformDataFileGateway implements DataFileGateway {
     if (picked.bytes != null) return picked.bytes;
     final path = picked.path;
     if (path == null) return null;
-    return File(path).readAsBytes();
+    return readPickedFilePath(path);
   }
 }

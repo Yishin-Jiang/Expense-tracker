@@ -71,7 +71,7 @@ class DataManagementService {
     final channelById = {for (final item in channels) item.id: item};
 
     final rows = <List<Object?>>[
-      const ['編號', '日期', '類型', '金額', '類別', '父類別', '購物類型', '備註', '來源'],
+      const ['編號', '日期', '類型', '金額', '類別', '父類別', '購物管道', '備註', '來源'],
       for (final transaction in transactions)
         () {
           final category = categoryById[transaction.categoryId];
@@ -220,11 +220,11 @@ class DataManagementService {
   ) {
     _validateBackupMetadata(categories, channels);
     final categoryIds = _uniqueIds(categories.map((item) => item.id), '類別');
-    final channelIds = _uniqueIds(channels.map((item) => item.id), '購物類型');
+    final channelIds = _uniqueIds(channels.map((item) => item.id), '購物管道');
     _uniqueIds(subscriptions.map((item) => item.id), '訂閱');
     _uniqueIds(transactions.map((item) => item.id), '交易');
     if (channels.map((item) => item.code).toSet().length != channels.length) {
-      throw const BackupFormatException('購物類型代碼重複。');
+      throw const BackupFormatException('購物管道代碼重複。');
     }
 
     final categoryById = {for (final item in categories) item.id: item};
@@ -292,7 +292,7 @@ class DataManagementService {
           channel.code.trim().length > 40 ||
           channel.name.trim().isEmpty ||
           channel.name.trim().length > 40) {
-        throw const BackupFormatException('購物類型名稱或代碼無效。');
+        throw const BackupFormatException('購物管道名稱或代碼無效。');
       }
     }
     for (final category in categories) {
