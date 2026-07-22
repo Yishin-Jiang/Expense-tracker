@@ -70,7 +70,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.textContaining('今天也要花得明白'), findsOneWidget);
+    expect(find.byKey(const Key('settingsButton')), findsOneWidget);
     final deleted = await database.select(database.transactions).getSingle();
     expect(deleted.deletedAt, isNotNull);
 

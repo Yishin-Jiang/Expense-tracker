@@ -4,6 +4,7 @@ import '../../features/calendar/presentation/calendar_page.dart';
 import '../../features/categories/presentation/category_form_page.dart';
 import '../../features/categories/presentation/category_management_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/settings/presentation/settings_page.dart';
 import '../../features/subscriptions/presentation/subscription_form_page.dart';
 import '../../features/subscriptions/presentation/subscription_page.dart';
 import '../../features/transactions/presentation/transaction_form_page.dart';
@@ -19,6 +20,7 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
           AppShell(location: state.uri.path, child: child),
       routes: [
         GoRoute(path: '/home', builder: (_, _) => const HomePage()),
+        GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
         GoRoute(path: '/calendar', builder: (_, _) => const CalendarPage()),
         GoRoute(
           path: '/categories',

@@ -54,6 +54,13 @@ class HomePage extends ConsumerWidget {
                   onPressed: () => context.go('/categories'),
                   icon: const Icon(Icons.category_outlined),
                 ),
+                const SizedBox(width: 6),
+                IconButton.filledTonal(
+                  key: const Key('settingsButton'),
+                  tooltip: '設定',
+                  onPressed: () => context.go('/settings'),
+                  icon: const Icon(Icons.settings_outlined),
+                ),
               ],
             ),
             const SizedBox(height: 6),

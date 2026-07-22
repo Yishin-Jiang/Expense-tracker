@@ -65,7 +65,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('7 月 21 日・今天也要花得明白'), findsOneWidget);
+    expect(find.text('7 月 21 日'), findsOneWidget);
     expect(find.text('NT\$ 420'), findsOneWidget);
     expect(find.textContaining('收入 NT\$ 2,000'), findsOneWidget);
     expect(find.textContaining('共 2 筆・支出 NT\$ 120'), findsOneWidget);

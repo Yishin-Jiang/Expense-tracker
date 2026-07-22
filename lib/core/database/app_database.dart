@@ -373,6 +373,49 @@ class AppDatabase extends _$AppDatabase {
       ]);
     });
   }
+
+  Future<void> replaceAllData({
+    required List<CategoryEntry> categories,
+    required List<ChannelEntry> channels,
+    required List<SubscriptionEntry> subscriptions,
+    required List<TransactionEntry> transactions,
+  }) {
+    return transaction(() async {
+      await _deleteAllData();
+      await batch((batch) {
+        batch.insertAll(this.channels, channels);
+        batch.insertAll(
+          this.categories,
+          categories.where((item) => item.parentId == null).toList(),
+        );
+        batch.insertAll(
+          this.categories,
+          categories.where((item) => item.parentId != null).toList(),
+        );
+        batch.insertAll(this.subscriptions, subscriptions);
+        batch.insertAll(this.transactions, transactions);
+      });
+    });
+  }
+
+  Future<void> clearAllDataAndRestoreDefaults() {
+    return transaction(() async {
+      await _deleteAllData();
+      await _seedDefaults();
+    });
+  }
+
+  Future<void> _deleteAllData() async {
+    await delete(transactions).go();
+    await delete(subscriptions).go();
+    await (delete(categories)..where((row) => row.parentId.isNotNull())).go();
+    await delete(categories).go();
+    await delete(channels).go();
+    await customStatement(
+      "DELETE FROM sqlite_sequence WHERE name IN "
+      "('categories', 'channels', 'subscriptions', 'transactions')",
+    );
+  }
 }
 
 LazyDatabase _openConnection() {
