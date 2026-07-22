@@ -43,7 +43,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 18px;
       padding:
         env(safe-area-inset-top)
         env(safe-area-inset-right)
@@ -55,19 +55,23 @@
     }
 
     #app-loading img {
-      width: 88px;
-      height: 88px;
-      border-radius: 22px;
+      width: clamp(112px, 30vw, 128px);
+      height: clamp(112px, 30vw, 128px);
+      border-radius: 28px;
     }
 
     #app-loading strong {
-      font-size: 20px;
+      margin-top: 2px;
+      font-size: clamp(24px, 6vw, 30px);
+      line-height: 1.2;
       letter-spacing: 0.02em;
     }
 
     #app-loading span {
       color: #616E66;
-      font-size: 14px;
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.4;
     }
 
     #app-loading.is-ready {
