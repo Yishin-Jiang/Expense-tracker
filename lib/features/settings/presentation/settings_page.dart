@@ -142,7 +142,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _exportCsv() => _runAction(
     () => ref.read(dataManagementServiceProvider).exportTransactionsCsv(),
-    successMessage: 'CSV 已建立，請選擇儲存或分享位置。',
+    successMessage: 'CSV 已建立，請完成儲存。',
   );
 
   Future<void> _exportBackup() => _runAction(
