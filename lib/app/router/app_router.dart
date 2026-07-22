@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/analysis/presentation/analysis_page.dart';
 import '../../features/calendar/presentation/calendar_page.dart';
 import '../../features/categories/presentation/category_form_page.dart';
 import '../../features/categories/presentation/category_management_page.dart';
 import '../../features/home/presentation/home_page.dart';
+import '../../features/subscriptions/presentation/subscription_form_page.dart';
+import '../../features/subscriptions/presentation/subscription_page.dart';
 import '../../features/transactions/presentation/transaction_form_page.dart';
 import '../../features/transactions/presentation/transaction_detail_page.dart';
 import '../shell/app_shell.dart';
@@ -59,29 +60,19 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
         GoRoute(path: '/analysis', builder: (_, _) => const AnalysisPage()),
         GoRoute(
           path: '/subscriptions',
-          builder: (_, _) => const ComingSoonPage(title: '訂閱'),
+          builder: (_, _) => const SubscriptionPage(),
+        ),
+        GoRoute(
+          path: '/subscriptions/new',
+          builder: (_, _) => const SubscriptionFormPage(),
+        ),
+        GoRoute(
+          path: '/subscriptions/:id/edit',
+          builder: (_, state) => SubscriptionFormPage(
+            subscriptionId: int.parse(state.pathParameters['id']!),
+          ),
         ),
       ],
     ),
   ],
 );
-
-class ComingSoonPage extends StatelessWidget {
-  const ComingSoonPage({required this.title, super.key});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) => SafeArea(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 8),
-          Text('此功能將在核心記帳完成後加入。', style: Theme.of(context).textTheme.bodySmall),
-        ],
-      ),
-    ),
-  );
-}

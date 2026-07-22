@@ -34,6 +34,33 @@ class Channels extends Table {
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
 }
 
+@DataClassName('SubscriptionEntry')
+class Subscriptions extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get categoryId => integer().references(Categories, #id)();
+  IntColumn get channelId => integer().nullable().references(Channels, #id)();
+  TextColumn get name => text().withLength(min: 1, max: 80)();
+  IntColumn get amount => integer()();
+  TextColumn get billingCycle => text()();
+  IntColumn get billingDay => integer()();
+  DateTimeColumn get startDate => dateTime()();
+  DateTimeColumn get endDate => dateTime().nullable()();
+  DateTimeColumn get nextBillingDate => dateTime()();
+  TextColumn get note => text().nullable()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  BoolColumn get autoCreateTransaction =>
+      boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  List<String> get customConstraints => [
+    'CHECK (amount > 0)',
+    'CHECK (billing_day BETWEEN 1 AND 31)',
+    "CHECK (billing_cycle IN ('monthly', 'quarterly', 'yearly'))",
+  ];
+}
+
 @DataClassName('TransactionEntry')
 class Transactions extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -173,16 +200,69 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
   }
 }
 
+@DriftAccessor(tables: [Subscriptions])
+class SubscriptionDao extends DatabaseAccessor<AppDatabase>
+    with _$SubscriptionDaoMixin {
+  SubscriptionDao(super.db);
+
+  Stream<List<SubscriptionEntry>> watchAllSubscriptions() {
+    return (select(subscriptions)..orderBy([
+          (row) => OrderingTerm.desc(row.isActive),
+          (row) => OrderingTerm.asc(row.nextBillingDate),
+          (row) => OrderingTerm.asc(row.name),
+        ]))
+        .watch();
+  }
+
+  Future<SubscriptionEntry?> getSubscription(int id) {
+    return (select(
+      subscriptions,
+    )..where((row) => row.id.equals(id))).getSingleOrNull();
+  }
+
+  Future<int> createSubscription(SubscriptionsCompanion subscription) {
+    return into(subscriptions).insert(subscription);
+  }
+
+  Future<int> updateSubscriptionFields(int id, SubscriptionsCompanion changes) {
+    return (update(
+      subscriptions,
+    )..where((row) => row.id.equals(id))).write(changes);
+  }
+
+  Future<int> setSubscriptionActive(int id, bool active) {
+    return updateSubscriptionFields(
+      id,
+      SubscriptionsCompanion(
+        isActive: Value(active),
+        updatedAt: Value(DateTime.now().toUtc()),
+      ),
+    );
+  }
+
+  Future<List<SubscriptionEntry>> getDueSubscriptions(DateTime end) {
+    return (select(subscriptions)
+          ..where(
+            (row) =>
+                row.isActive.equals(true) &
+                row.autoCreateTransaction.equals(true) &
+                row.nextBillingDate.isSmallerOrEqualValue(end.toUtc()),
+          )
+          ..orderBy([(row) => OrderingTerm.asc(row.nextBillingDate)]))
+        .get();
+  }
+}
+
 @DriftDatabase(
-  tables: [Categories, Channels, Transactions],
-  daos: [CategoryDao, ChannelDao, TransactionDao],
+  tables: [Categories, Channels, Subscriptions, Transactions],
+  daos: [CategoryDao, ChannelDao, TransactionDao, SubscriptionDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -200,10 +280,20 @@ class AppDatabase extends _$AppDatabase {
         'CREATE INDEX idx_transactions_category '
         'ON transactions (category_id)',
       );
+      await customStatement(
+        'CREATE INDEX idx_subscriptions_next_billing '
+        'ON subscriptions (is_active, next_billing_date)',
+      );
       await _seedDefaults();
     },
     onUpgrade: (migrator, from, to) async {
-      // Future schema changes are added here, one version at a time.
+      if (from < 2) {
+        await migrator.createTable(subscriptions);
+        await customStatement(
+          'CREATE INDEX idx_subscriptions_next_billing '
+          'ON subscriptions (is_active, next_billing_date)',
+        );
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');

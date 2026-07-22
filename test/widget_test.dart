@@ -8,6 +8,9 @@ import 'package:accounting_app/features/channels/presentation/providers/channel_
 import 'package:accounting_app/features/transactions/domain/transaction.dart';
 import 'package:accounting_app/features/transactions/domain/transaction_repository.dart';
 import 'package:accounting_app/features/transactions/presentation/providers/transaction_providers.dart';
+import 'package:accounting_app/features/subscriptions/domain/subscription.dart';
+import 'package:accounting_app/features/subscriptions/domain/subscription_repository.dart';
+import 'package:accounting_app/features/subscriptions/presentation/providers/subscription_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -59,6 +62,9 @@ Widget _testApp() => ProviderScope(
     channelRepositoryProvider.overrideWithValue(const _FakeChannelRepository()),
     transactionRepositoryProvider.overrideWithValue(
       const _FakeTransactionRepository(),
+    ),
+    subscriptionRepositoryProvider.overrideWithValue(
+      const _FakeSubscriptionRepository(),
     ),
   ],
   child: const AccountingApp(),
@@ -154,4 +160,31 @@ class _FakeTransactionRepository implements TransactionRepository {
 
   @override
   Future<void> deleteTransaction(int id) => throw UnimplementedError();
+}
+
+class _FakeSubscriptionRepository implements SubscriptionRepository {
+  const _FakeSubscriptionRepository();
+
+  @override
+  Stream<List<SubscriptionRecord>> watchSubscriptions() =>
+      Stream.value(const []);
+
+  @override
+  Future<SubscriptionRecord?> getSubscription(int id) async => null;
+
+  @override
+  Future<SubscriptionRecord> createSubscription(SubscriptionInput input) =>
+      throw UnimplementedError();
+
+  @override
+  Future<SubscriptionRecord> updateSubscription(
+    int id,
+    SubscriptionInput input,
+  ) => throw UnimplementedError();
+
+  @override
+  Future<void> setSubscriptionActive(int id, bool active) async {}
+
+  @override
+  Future<int> processDueSubscriptions(DateTime today) async => 0;
 }
