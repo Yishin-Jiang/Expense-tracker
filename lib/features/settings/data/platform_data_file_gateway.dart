@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -6,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../domain/data_file_gateway.dart';
+import 'picked_file_reader.dart';
 
 class PlatformDataFileGateway implements DataFileGateway {
   const PlatformDataFileGateway();
@@ -35,6 +35,6 @@ class PlatformDataFileGateway implements DataFileGateway {
     if (picked.bytes != null) return picked.bytes;
     final path = picked.path;
     if (path == null) return null;
-    return File(path).readAsBytes();
+    return readPickedFilePath(path);
   }
 }

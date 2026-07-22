@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+
+import 'database_connection.dart';
 
 part 'app_database.g.dart';
 
@@ -265,7 +262,7 @@ class SubscriptionDao extends DatabaseAccessor<AppDatabase>
   daos: [CategoryDao, ChannelDao, TransactionDao, SubscriptionDao],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(openDatabaseConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
@@ -416,12 +413,4 @@ class AppDatabase extends _$AppDatabase {
       "('categories', 'channels', 'subscriptions', 'transactions')",
     );
   }
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File(p.join(directory.path, 'accounting.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
 }
