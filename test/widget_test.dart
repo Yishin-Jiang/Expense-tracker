@@ -38,11 +38,13 @@ void main() {
     await tester.pumpWidget(_testApp());
     await tester.pumpAndSettle();
     await tester.tap(find.text('月曆'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('每天的花費，一眼就知道'), findsOneWidget);
+    expect(find.text('還沒有記帳紀錄'), findsNothing);
     await tester.tap(find.text('記帳'));
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('新增一筆'), findsOneWidget);
+    expect(find.text('每天的花費，一眼就知道'), findsNothing);
   });
 
   testWidgets('quick entry prefills its expense category', (tester) async {

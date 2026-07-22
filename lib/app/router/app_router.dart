@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/analysis/presentation/analysis_page.dart';
 import '../../features/calendar/presentation/calendar_page.dart';
@@ -12,6 +13,9 @@ import '../../features/transactions/presentation/transaction_detail_page.dart';
 import '../../features/transactions/presentation/transaction_history_page.dart';
 import '../shell/app_shell.dart';
 
+NoTransitionPage<void> _tabPage(GoRouterState state, Widget child) =>
+    NoTransitionPage<void>(key: state.pageKey, child: child);
+
 GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
   initialLocation: initialLocation,
   routes: [
@@ -19,9 +23,15 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
       builder: (context, state, child) =>
           AppShell(location: state.uri.path, child: child),
       routes: [
-        GoRoute(path: '/home', builder: (_, _) => const HomePage()),
+        GoRoute(
+          path: '/home',
+          pageBuilder: (_, state) => _tabPage(state, const HomePage()),
+        ),
         GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
-        GoRoute(path: '/calendar', builder: (_, _) => const CalendarPage()),
+        GoRoute(
+          path: '/calendar',
+          pageBuilder: (_, state) => _tabPage(state, const CalendarPage()),
+        ),
         GoRoute(
           path: '/categories',
           builder: (_, _) => const CategoryManagementPage(),
@@ -42,13 +52,16 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
         ),
         GoRoute(
           path: '/transactions/new',
-          builder: (_, state) {
+          pageBuilder: (_, state) {
             final date = state.uri.queryParameters['date'];
-            return TransactionFormPage(
-              presetCategoryId: int.tryParse(
-                state.uri.queryParameters['categoryId'] ?? '',
+            return _tabPage(
+              state,
+              TransactionFormPage(
+                presetCategoryId: int.tryParse(
+                  state.uri.queryParameters['categoryId'] ?? '',
+                ),
+                presetDate: date == null ? null : DateTime.tryParse(date),
               ),
-              presetDate: date == null ? null : DateTime.tryParse(date),
             );
           },
         ),
@@ -64,10 +77,13 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
             transactionId: int.parse(state.pathParameters['id']!),
           ),
         ),
-        GoRoute(path: '/analysis', builder: (_, _) => const AnalysisPage()),
+        GoRoute(
+          path: '/analysis',
+          pageBuilder: (_, state) => _tabPage(state, const AnalysisPage()),
+        ),
         GoRoute(
           path: '/subscriptions',
-          builder: (_, _) => const SubscriptionPage(),
+          pageBuilder: (_, state) => _tabPage(state, const SubscriptionPage()),
         ),
         GoRoute(
           path: '/subscriptions/new',
