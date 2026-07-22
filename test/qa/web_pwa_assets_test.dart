@@ -57,4 +57,31 @@ void main() {
     expect(worker, contains("fetch(request)"));
     expect(worker, contains("caches.match(request)"));
   });
+
+  test('Cloudflare Workers deployment keeps preview and production separate', () {
+    final wrangler =
+        jsonDecode(File('wrangler.jsonc').readAsStringSync())
+            as Map<String, dynamic>;
+    final assets = wrangler['assets']! as Map<String, dynamic>;
+    final headers = File('web/_headers').readAsStringSync();
+    final workflow =
+        File(
+          '.github/workflows/cloudflare-workers.yml',
+        ).readAsStringSync();
+
+    expect(wrangler['name'], 'self-accounting-0310');
+    expect(wrangler['preview_urls'], isTrue);
+    expect(assets['directory'], './build/web');
+    expect(assets['not_found_handling'], 'single-page-application');
+
+    expect(headers, contains('/pwa_service_worker.js'));
+    expect(headers, contains('Content-Type: application/wasm'));
+    expect(headers, contains('X-Content-Type-Options: nosniff'));
+
+    expect(workflow, contains("github.ref == 'refs/heads/web-pwa'"));
+    expect(workflow, contains('versions upload --preview-alias web-pwa'));
+    expect(workflow, contains("github.ref == 'refs/heads/main'"));
+    expect(workflow, contains('command: deploy'));
+    expect(workflow, contains('cp web/_headers build/web/_headers'));
+  });
 }
