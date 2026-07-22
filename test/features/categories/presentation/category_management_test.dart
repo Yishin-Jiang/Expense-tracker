@@ -26,7 +26,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('類別管理'), findsOneWidget);
+    expect(find.text('分類管理'), findsOneWidget);
     expect(find.text('飲食'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('addCategoryButton')));

@@ -140,10 +140,27 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
 class ChannelDao extends DatabaseAccessor<AppDatabase> with _$ChannelDaoMixin {
   ChannelDao(super.db);
 
+  Stream<List<ChannelEntry>> watchAllChannels() {
+    return (select(channels)..orderBy([
+          (row) => OrderingTerm.desc(row.isActive),
+          (row) => OrderingTerm.asc(row.name),
+        ]))
+        .watch();
+  }
+
   Stream<List<ChannelEntry>> watchActiveChannels() {
-    return (select(
-      channels,
-    )..where((row) => row.isActive.equals(true))).watch();
+    return (select(channels)
+          ..where((row) => row.isActive.equals(true))
+          ..orderBy([(row) => OrderingTerm.asc(row.name)]))
+        .watch();
+  }
+
+  Future<int> createChannel(ChannelsCompanion channel) {
+    return into(channels).insert(channel);
+  }
+
+  Future<int> updateChannelFields(int id, ChannelsCompanion changes) {
+    return (update(channels)..where((row) => row.id.equals(id))).write(changes);
   }
 }
 

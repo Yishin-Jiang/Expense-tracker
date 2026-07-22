@@ -76,7 +76,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     key: const Key('exportBackupButton'),
                     icon: Icons.cloud_upload_outlined,
                     title: '建立完整備份',
-                    subtitle: '包含類別、購物類型、交易與訂閱',
+                    subtitle: '包含類別、購物管道、交易與訂閱',
                     onTap: _busy ? null : _exportBackup,
                   ),
                   const Divider(height: 1),

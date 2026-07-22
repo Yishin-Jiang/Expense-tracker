@@ -50,7 +50,7 @@ class HomePage extends ConsumerWidget {
                 const SizedBox(width: 6),
                 IconButton.filledTonal(
                   key: const Key('manageCategoriesButton'),
-                  tooltip: '管理類別',
+                  tooltip: '管理分類',
                   onPressed: () => context.go('/categories'),
                   icon: const Icon(Icons.category_outlined),
                 ),

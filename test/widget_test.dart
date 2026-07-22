@@ -54,7 +54,7 @@ void main() {
   ) async {
     const destinations = [
       (Key('transactionHistoryButton'), '交易紀錄'),
-      (Key('manageCategoriesButton'), '類別管理'),
+      (Key('manageCategoriesButton'), '分類管理'),
       (Key('settingsButton'), '設定'),
     ];
 
@@ -170,7 +170,27 @@ class _FakeChannelRepository implements ChannelRepository {
   }
 
   @override
+  Stream<List<ShoppingChannel>> watchAllChannels() {
+    return Stream.value(const []);
+  }
+
+  @override
   Future<ShoppingChannel?> getChannel(int id) async => null;
+
+  @override
+  Future<ShoppingChannel> createChannel(ShoppingChannelInput input) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<ShoppingChannel> updateChannel(int id, ShoppingChannelInput input) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setChannelActive(int id, bool active) {
+    throw UnimplementedError();
+  }
 }
 
 class _FakeTransactionRepository implements TransactionRepository {

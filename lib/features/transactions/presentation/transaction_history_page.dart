@@ -38,7 +38,7 @@ class _TransactionHistoryPageState
   Widget build(BuildContext context) {
     final transactions = ref.watch(allTransactionsProvider);
     final categories = ref.watch(allCategoriesProvider);
-    final channels = ref.watch(activeChannelsProvider);
+    final channels = ref.watch(allChannelsProvider);
     final categoryItems = categories.asData?.value ?? const <Category>[];
     final channelItems = channels.asData?.value ?? const <ShoppingChannel>[];
 
@@ -418,9 +418,9 @@ class _TransactionFilterSheetState extends State<_TransactionFilterSheet> {
                 ChannelFilterMode.unset => 'unset',
                 ChannelFilterMode.selected => 'selected:${_channelId ?? ''}',
               },
-              decoration: const InputDecoration(labelText: '購物類型'),
+              decoration: const InputDecoration(labelText: '購物管道'),
               items: [
-                const DropdownMenuItem(value: 'any', child: Text('全部購物類型')),
+                const DropdownMenuItem(value: 'any', child: Text('全部購物管道')),
                 const DropdownMenuItem(value: 'unset', child: Text('未設定')),
                 for (final item in widget.channels)
                   DropdownMenuItem(

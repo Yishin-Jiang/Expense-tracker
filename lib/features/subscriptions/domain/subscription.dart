@@ -72,7 +72,7 @@ class SubscriptionInput {
   void validate() {
     if (categoryId <= 0) throw const FormatException('請選擇支出類別');
     if (channelId != null && channelId! <= 0) {
-      throw const FormatException('購物類型無效');
+      throw const FormatException('購物管道無效');
     }
     if (name.trim().isEmpty) throw const FormatException('請輸入訂閱名稱');
     if (name.trim().length > 80) {

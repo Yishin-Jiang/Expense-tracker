@@ -87,7 +87,7 @@ class _SubscriptionEditorState extends ConsumerState<_SubscriptionEditor> {
   Widget build(BuildContext context) {
     final editing = widget.initialSubscription != null;
     final categories = ref.watch(allCategoriesProvider);
-    final channels = ref.watch(activeChannelsProvider);
+    final channels = ref.watch(allChannelsProvider);
     return SafeArea(
       child: Form(
         key: _formKey,
@@ -182,27 +182,29 @@ class _SubscriptionEditorState extends ConsumerState<_SubscriptionEditor> {
               error: (error, _) => Text('類別載入失敗：$error'),
             ),
             const SizedBox(height: 20),
-            Text('購物類型（選填）', style: Theme.of(context).textTheme.titleLarge),
+            Text('購物管道（選填）', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 10),
             channels.when(
-              data: (items) => Wrap(
-                spacing: 8,
-                children: [
-                  ChoiceChip(
-                    label: const Text('未設定'),
-                    selected: _channelId == null,
-                    onSelected: (_) => setState(() => _channelId = null),
-                  ),
-                  for (final item in items)
-                    ChoiceChip(
-                      label: Text(item.name),
-                      selected: _channelId == item.id,
-                      onSelected: (_) => setState(() => _channelId = item.id),
+              data: (items) => DropdownButtonFormField<int?>(
+                key: const Key('subscriptionChannelField'),
+                initialValue: _channelId,
+                decoration: const InputDecoration(labelText: '選擇購物管道'),
+                items: [
+                  const DropdownMenuItem<int?>(value: null, child: Text('不設定')),
+                  for (final item in items.where(
+                    (item) => item.isActive || item.id == _channelId,
+                  ))
+                    DropdownMenuItem<int?>(
+                      value: item.id,
+                      child: Text(
+                        item.isActive ? item.name : '${item.name}（已停用）',
+                      ),
                     ),
                 ],
+                onChanged: (value) => setState(() => _channelId = value),
               ),
               loading: () => const LinearProgressIndicator(),
-              error: (error, _) => Text('購物類型載入失敗：$error'),
+              error: (error, _) => Text('購物管道載入失敗：$error'),
             ),
             const SizedBox(height: 20),
             _DateField(
