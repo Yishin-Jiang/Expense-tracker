@@ -115,7 +115,7 @@ class _TransactionEditorState extends ConsumerState<_TransactionEditor> {
     final categoryType = _type == TransactionType.expense
         ? CategoryType.expense
         : CategoryType.income;
-    final categories = ref.watch(activeCategoriesProvider(categoryType));
+    final categories = ref.watch(allCategoriesProvider);
     final channels = ref.watch(allChannelsProvider);
     final editing = widget.initialTransaction != null;
 
@@ -175,17 +175,36 @@ class _TransactionEditorState extends ConsumerState<_TransactionEditor> {
             Text('類別', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 10),
             categories.when(
-              data: (items) => DropdownButtonFormField<int>(
-                key: ValueKey('category-${_type.name}'),
-                initialValue: _categoryId,
-                decoration: const InputDecoration(labelText: '選擇類別'),
-                items: [
-                  for (final item in items)
-                    DropdownMenuItem(value: item.id, child: Text(item.name)),
-                ],
-                onChanged: (value) => setState(() => _categoryId = value),
-                validator: (value) => value == null ? '請選擇類別' : null,
-              ),
+              data: (items) {
+                final selectable = selectableCategories(
+                  items,
+                  categoryType,
+                  selectedId: editing ? _categoryId : null,
+                );
+                final selectedValue =
+                    selectable.any((item) => item.id == _categoryId)
+                    ? _categoryId
+                    : null;
+                return DropdownButtonFormField<int>(
+                  key: ValueKey('category-${_type.name}'),
+                  initialValue: selectedValue,
+                  decoration: const InputDecoration(
+                    labelText: '選擇細項類別',
+                    helperText: '有子類別的父類別會用於分析彙總',
+                  ),
+                  items: [
+                    for (final item in selectable)
+                      DropdownMenuItem(
+                        value: item.id,
+                        child: Text(
+                          item.isActive ? item.name : '${item.name}（已停用）',
+                        ),
+                      ),
+                  ],
+                  onChanged: (value) => setState(() => _categoryId = value),
+                  validator: (value) => value == null ? '請選擇類別' : null,
+                );
+              },
               loading: () => const LinearProgressIndicator(),
               error: (error, _) => Text('類別載入失敗：$error'),
             ),

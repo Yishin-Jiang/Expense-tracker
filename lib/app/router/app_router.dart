@@ -13,7 +13,7 @@ import '../../features/transactions/presentation/transaction_detail_page.dart';
 import '../../features/transactions/presentation/transaction_history_page.dart';
 import '../shell/app_shell.dart';
 
-NoTransitionPage<void> _tabPage(GoRouterState state, Widget child) =>
+NoTransitionPage<void> _noTransitionPage(GoRouterState state, Widget child) =>
     NoTransitionPage<void>(key: state.pageKey, child: child);
 
 GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
@@ -25,41 +25,47 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
       routes: [
         GoRoute(
           path: '/home',
-          pageBuilder: (_, state) => _tabPage(state, const HomePage()),
+          pageBuilder: (_, state) => _noTransitionPage(state, const HomePage()),
         ),
         GoRoute(
           path: '/settings',
-          pageBuilder: (_, state) => _tabPage(state, const SettingsPage()),
+          pageBuilder: (_, state) =>
+              _noTransitionPage(state, const SettingsPage()),
         ),
         GoRoute(
           path: '/calendar',
-          pageBuilder: (_, state) => _tabPage(state, const CalendarPage()),
+          pageBuilder: (_, state) =>
+              _noTransitionPage(state, const CalendarPage()),
         ),
         GoRoute(
           path: '/categories',
           pageBuilder: (_, state) =>
-              _tabPage(state, const CategoryManagementPage()),
+              _noTransitionPage(state, const CategoryManagementPage()),
         ),
         GoRoute(
           path: '/categories/new',
-          builder: (_, _) => const CategoryFormPage(),
+          pageBuilder: (_, state) =>
+              _noTransitionPage(state, const CategoryFormPage()),
         ),
         GoRoute(
           path: '/categories/:id/edit',
-          builder: (_, state) => CategoryFormPage(
-            categoryId: int.parse(state.pathParameters['id']!),
+          pageBuilder: (_, state) => _noTransitionPage(
+            state,
+            CategoryFormPage(
+              categoryId: int.parse(state.pathParameters['id']!),
+            ),
           ),
         ),
         GoRoute(
           path: '/transactions/history',
           pageBuilder: (_, state) =>
-              _tabPage(state, const TransactionHistoryPage()),
+              _noTransitionPage(state, const TransactionHistoryPage()),
         ),
         GoRoute(
           path: '/transactions/new',
           pageBuilder: (_, state) {
             final date = state.uri.queryParameters['date'];
-            return _tabPage(
+            return _noTransitionPage(
               state,
               TransactionFormPage(
                 presetCategoryId: int.tryParse(
@@ -72,32 +78,44 @@ GoRouter createAppRouter({String initialLocation = '/home'}) => GoRouter(
         ),
         GoRoute(
           path: '/transactions/:id',
-          builder: (_, state) => TransactionDetailPage(
-            transactionId: int.parse(state.pathParameters['id']!),
+          pageBuilder: (_, state) => _noTransitionPage(
+            state,
+            TransactionDetailPage(
+              transactionId: int.parse(state.pathParameters['id']!),
+            ),
           ),
         ),
         GoRoute(
           path: '/transactions/:id/edit',
-          builder: (_, state) => TransactionFormPage(
-            transactionId: int.parse(state.pathParameters['id']!),
+          pageBuilder: (_, state) => _noTransitionPage(
+            state,
+            TransactionFormPage(
+              transactionId: int.parse(state.pathParameters['id']!),
+            ),
           ),
         ),
         GoRoute(
           path: '/analysis',
-          pageBuilder: (_, state) => _tabPage(state, const AnalysisPage()),
+          pageBuilder: (_, state) =>
+              _noTransitionPage(state, const AnalysisPage()),
         ),
         GoRoute(
           path: '/subscriptions',
-          pageBuilder: (_, state) => _tabPage(state, const SubscriptionPage()),
+          pageBuilder: (_, state) =>
+              _noTransitionPage(state, const SubscriptionPage()),
         ),
         GoRoute(
           path: '/subscriptions/new',
-          builder: (_, _) => const SubscriptionFormPage(),
+          pageBuilder: (_, state) =>
+              _noTransitionPage(state, const SubscriptionFormPage()),
         ),
         GoRoute(
           path: '/subscriptions/:id/edit',
-          builder: (_, state) => SubscriptionFormPage(
-            subscriptionId: int.parse(state.pathParameters['id']!),
+          pageBuilder: (_, state) => _noTransitionPage(
+            state,
+            SubscriptionFormPage(
+              subscriptionId: int.parse(state.pathParameters['id']!),
+            ),
           ),
         ),
       ],

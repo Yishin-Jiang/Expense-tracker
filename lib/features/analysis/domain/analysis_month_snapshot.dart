@@ -32,11 +32,16 @@ class AnalysisMonthSnapshot {
   }
 
   List<TransactionRecord> transactionsForCategory(int categoryId) =>
-      transactions
-          .where(
-            (item) =>
-                item.type == TransactionType.expense &&
-                item.categoryId == categoryId,
-          )
-          .toList(growable: false);
+      transactionsForCategories({categoryId});
+
+  List<TransactionRecord> transactionsForCategories(Iterable<int> categoryIds) {
+    final ids = categoryIds.toSet();
+    return transactions
+        .where(
+          (item) =>
+              item.type == TransactionType.expense &&
+              ids.contains(item.categoryId),
+        )
+        .toList(growable: false);
+  }
 }

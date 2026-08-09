@@ -9,6 +9,7 @@ void main() {
   final categories = [
     Category(
       id: 1,
+      parentId: 3,
       name: '午餐',
       type: CategoryType.expense,
       sortOrder: 1,
@@ -21,6 +22,15 @@ void main() {
       name: '薪資',
       type: CategoryType.income,
       sortOrder: 2,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    ),
+    Category(
+      id: 3,
+      name: '飲食',
+      type: CategoryType.expense,
+      sortOrder: 0,
       isActive: true,
       createdAt: DateTime(2026),
       updatedAt: DateTime(2026),
@@ -50,7 +60,7 @@ void main() {
   ];
 
   test('search matches note, category, channel, amount, and type', () {
-    for (final query in ['學校', '午餐', '網購', '120', '支出']) {
+    for (final query in ['學校', '午餐', '飲食', '網購', '120', '支出']) {
       final result = filterTransactions(
         transactions: transactions,
         categories: categories,
@@ -59,6 +69,16 @@ void main() {
       );
       expect(result.map((item) => item.id), [1], reason: query);
     }
+  });
+
+  test('selecting a parent category includes child transactions', () {
+    final result = filterTransactions(
+      transactions: transactions,
+      categories: categories,
+      channels: channels,
+      filter: const TransactionFilter(categoryId: 3),
+    );
+    expect(result.map((item) => item.id), [1]);
   });
 
   test('combines type category channel and inclusive date filters', () {

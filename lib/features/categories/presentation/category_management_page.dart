@@ -238,7 +238,11 @@ class _CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     child: Column(
       children: [
-        _CategoryTile(category: category, onSetActive: onSetActive),
+        _CategoryTile(
+          category: category,
+          onSetActive: onSetActive,
+          isParent: children.isNotEmpty,
+        ),
         for (final child in children) ...[
           const Divider(height: 1, indent: 64),
           Padding(
@@ -260,11 +264,13 @@ class _CategoryTile extends StatelessWidget {
     required this.category,
     required this.onSetActive,
     this.isChild = false,
+    this.isParent = false,
   });
 
   final Category category;
   final Future<void> Function(Category category, bool active) onSetActive;
   final bool isChild;
+  final bool isParent;
 
   @override
   Widget build(BuildContext context) => Opacity(
@@ -278,7 +284,13 @@ class _CategoryTile extends StatelessWidget {
       ),
       title: Text(category.name),
       subtitle: Text(
-        category.isActive ? (isChild ? '子類別' : '主要類別') : '已停用・歷史資料保留',
+        category.isActive
+            ? isChild
+                  ? '記帳細項'
+                  : isParent
+                  ? '父類別・僅用於彙總分析'
+                  : '可直接記帳的類別'
+            : '已停用・歷史資料保留',
       ),
       trailing: PopupMenuButton<String>(
         key: Key('categoryMenu-${category.id}'),

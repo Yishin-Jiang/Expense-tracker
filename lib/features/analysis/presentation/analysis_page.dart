@@ -73,12 +73,15 @@ class _AnalysisPageState extends ConsumerState<AnalysisPage> {
                   _CategoryAnalysis(
                     snapshot: snapshot,
                     categories: categoryItems,
-                    onCategoryTap: (categoryId) => _showCategoryTransactions(
-                      snapshot,
-                      categoryId,
-                      categoryItems,
-                      channelItems,
-                    ),
+                    onCategoryTap: (categoryIds, displayCategoryId, label) =>
+                        _showCategoryTransactions(
+                          snapshot,
+                          categoryIds,
+                          displayCategoryId,
+                          label,
+                          categoryItems,
+                          channelItems,
+                        ),
                   ),
                   const SizedBox(height: 16),
                   _ChannelAnalysis(snapshot: snapshot, channels: channelItems),
@@ -102,12 +105,14 @@ class _AnalysisPageState extends ConsumerState<AnalysisPage> {
 
   void _showCategoryTransactions(
     AnalysisMonthSnapshot snapshot,
-    int categoryId,
+    Set<int> categoryIds,
+    int displayCategoryId,
+    String label,
     List<Category> categories,
     List<ShoppingChannel> channels,
   ) {
-    final category = _categoryById(categories, categoryId);
-    final transactions = snapshot.transactionsForCategory(categoryId);
+    final category = _categoryById(categories, displayCategoryId);
+    final transactions = snapshot.transactionsForCategories(categoryIds);
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -122,7 +127,7 @@ class _AnalysisPageState extends ConsumerState<AnalysisPage> {
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
           children: [
             Text(
-              '${category?.name ?? '未分類'}交易',
+              '$label交易',
               key: const Key('analysisTransactionSheetTitle'),
               style: Theme.of(context).textTheme.titleLarge,
             ),
@@ -465,13 +470,12 @@ class _CategoryAnalysis extends StatelessWidget {
   });
   final AnalysisMonthSnapshot snapshot;
   final List<Category> categories;
-  final ValueChanged<int> onCategoryTap;
+  final void Function(Set<int>, int, String) onCategoryTap;
 
   @override
   Widget build(BuildContext context) {
-    final entries = snapshot.categoryExpenses.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    if (entries.isEmpty) {
+    final groups = _buildCategoryGroups(snapshot, categories);
+    if (groups.isEmpty) {
       return const _SectionCard(
         title: '支出類別',
         subtitle: '開始記帳後，這裡會顯示類別占比',
@@ -480,12 +484,11 @@ class _CategoryAnalysis extends StatelessWidget {
     }
 
     final colors = [
-      for (final entry in entries)
-        categoryColor(_categoryById(categories, entry.key)?.color),
+      for (final group in groups) categoryColor(group.category?.color),
     ];
     return _SectionCard(
       title: '支出類別',
-      subtitle: '點擊類別可查看本月交易',
+      subtitle: '依父類別彙總，展開可查看子類別細項',
       child: Column(
         children: [
           SizedBox(
@@ -496,7 +499,7 @@ class _CategoryAnalysis extends StatelessWidget {
                 CustomPaint(
                   size: const Size.square(140),
                   painter: _DonutChartPainter(
-                    values: entries.map((entry) => entry.value).toList(),
+                    values: groups.map((group) => group.amount).toList(),
                     colors: colors,
                   ),
                 ),
@@ -515,17 +518,183 @@ class _CategoryAnalysis extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          for (var index = 0; index < entries.length; index++)
-            _CategoryRow(
-              category: _categoryById(categories, entries[index].key),
-              categoryId: entries[index].key,
-              amount: entries[index].value,
+          for (var index = 0; index < groups.length; index++)
+            _CategoryGroupRow(
+              group: groups[index],
+              categories: categories,
               total: snapshot.expense,
               color: colors[index],
-              onTap: () => onCategoryTap(entries[index].key),
+              onCategoryTap: onCategoryTap,
             ),
         ],
       ),
+    );
+  }
+}
+
+class _CategoryExpenseGroup {
+  const _CategoryExpenseGroup({
+    required this.id,
+    required this.category,
+    required this.amount,
+    required this.details,
+  });
+
+  final int id;
+  final Category? category;
+  final int amount;
+  final List<MapEntry<int, int>> details;
+
+  bool get hasChildDetails => details.any((entry) => entry.key != id);
+  Set<int> get categoryIds => details.map((entry) => entry.key).toSet();
+}
+
+List<_CategoryExpenseGroup> _buildCategoryGroups(
+  AnalysisMonthSnapshot snapshot,
+  List<Category> categories,
+) {
+  final byId = {for (final category in categories) category.id: category};
+  final amounts = <int, int>{};
+  final details = <int, List<MapEntry<int, int>>>{};
+
+  for (final entry in snapshot.categoryExpenses.entries) {
+    final category = byId[entry.key];
+    final parentId = category?.parentId;
+    final groupId = parentId != null && byId.containsKey(parentId)
+        ? parentId
+        : entry.key;
+    amounts.update(
+      groupId,
+      (value) => value + entry.value,
+      ifAbsent: () => entry.value,
+    );
+    details.putIfAbsent(groupId, () => []).add(entry);
+  }
+
+  final groups = [
+    for (final entry in amounts.entries)
+      _CategoryExpenseGroup(
+        id: entry.key,
+        category: byId[entry.key],
+        amount: entry.value,
+        details: details[entry.key]!
+          ..sort((a, b) => b.value.compareTo(a.value)),
+      ),
+  ]..sort((a, b) => b.amount.compareTo(a.amount));
+  return groups;
+}
+
+class _CategoryGroupRow extends StatelessWidget {
+  const _CategoryGroupRow({
+    required this.group,
+    required this.categories,
+    required this.total,
+    required this.color,
+    required this.onCategoryTap,
+  });
+
+  final _CategoryExpenseGroup group;
+  final List<Category> categories;
+  final int total;
+  final Color color;
+  final void Function(Set<int>, int, String) onCategoryTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = group.category?.name ?? '未分類';
+    if (!group.hasChildDetails) {
+      return _CategoryRow(
+        category: group.category,
+        categoryId: group.id,
+        amount: group.amount,
+        total: total,
+        color: color,
+        onTap: () => onCategoryTap(group.categoryIds, group.id, label),
+      );
+    }
+
+    final percent = total == 0 ? 0 : group.amount / total * 100;
+    return ExpansionTile(
+      key: Key('analysisCategoryGroup-${group.id}'),
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: const EdgeInsets.only(left: 28),
+      leading: CircleAvatar(
+        backgroundColor: color,
+        foregroundColor: AppColors.ink,
+        child: Icon(categoryIcon(group.category?.icon)),
+      ),
+      title: Row(
+        children: [
+          Expanded(child: Text(label)),
+          Text(
+            formatTwd(group.amount),
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
+      subtitle: Text('${percent.toStringAsFixed(1)}%・點擊展開細項'),
+      children: [
+        for (final detail in group.details)
+          _CategoryDetailRow(
+            category: _categoryById(categories, detail.key),
+            parentId: group.id,
+            amount: detail.value,
+            total: group.amount,
+            onTap: () {
+              final category = _categoryById(categories, detail.key);
+              final detailLabel = detail.key == group.id
+                  ? '$label（未細分）'
+                  : category?.name ?? '未分類';
+              onCategoryTap({detail.key}, detail.key, detailLabel);
+            },
+          ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: TextButton(
+            key: Key('analysisCategoryAll-${group.id}'),
+            onPressed: () =>
+                onCategoryTap(group.categoryIds, group.id, '$label・全部'),
+            child: const Text('查看此類別全部交易'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CategoryDetailRow extends StatelessWidget {
+  const _CategoryDetailRow({
+    required this.category,
+    required this.parentId,
+    required this.amount,
+    required this.total,
+    required this.onTap,
+  });
+
+  final Category? category;
+  final int parentId;
+  final int amount;
+  final int total;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isUnspecified = category?.id == parentId;
+    final percent = total == 0 ? 0 : amount / total * 100;
+    return ListTile(
+      key: Key('analysisCategory-${category?.id ?? 0}'),
+      contentPadding: EdgeInsets.zero,
+      title: Text(
+        isUnspecified
+            ? '${category?.name ?? '未分類'}（未細分）'
+            : category?.name ?? '未分類',
+      ),
+      subtitle: Text('占此父類別 ${percent.toStringAsFixed(1)}%'),
+      trailing: Text(
+        formatTwd(amount),
+        style: const TextStyle(fontWeight: FontWeight.w700),
+      ),
+      onTap: onTap,
     );
   }
 }

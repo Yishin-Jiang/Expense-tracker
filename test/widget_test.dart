@@ -119,7 +119,17 @@ class _FakeCategoryRepository implements CategoryRepository {
   const _FakeCategoryRepository();
 
   @override
-  Stream<List<Category>> watchAllCategories() => Stream.value(const []);
+  Stream<List<Category>> watchAllCategories() => Stream.value([
+    Category(
+      id: 12,
+      name: '午餐',
+      type: CategoryType.expense,
+      sortOrder: 12,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    ),
+  ]);
 
   @override
   Stream<List<Category>> watchActiveCategories(CategoryType type) {

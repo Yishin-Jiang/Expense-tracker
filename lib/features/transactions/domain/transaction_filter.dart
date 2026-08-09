@@ -49,7 +49,14 @@ List<TransactionRecord> filterTransactions({
   required TransactionFilter filter,
 }) {
   final categoryNames = {for (final item in categories) item.id: item.name};
+  final parentNames = {
+    for (final item in categories)
+      item.id: item.parentId == null ? '' : categoryNames[item.parentId] ?? '',
+  };
   final channelNames = {for (final item in channels) item.id: item.name};
+  final selectedCategoryIds = filter.categoryId == null
+      ? const <int>{}
+      : categoryIdsForSelection(categories, filter.categoryId!);
   final query = filter.query.trim().toLowerCase();
   final start = filter.startDate == null
       ? null
@@ -72,7 +79,7 @@ List<TransactionRecord> filterTransactions({
           return false;
         }
         if (filter.categoryId != null &&
-            transaction.categoryId != filter.categoryId) {
+            !selectedCategoryIds.contains(transaction.categoryId)) {
           return false;
         }
         if (filter.channelMode == ChannelFilterMode.unset &&
@@ -97,6 +104,7 @@ List<TransactionRecord> filterTransactions({
         final searchable = [
           transaction.note ?? '',
           categoryNames[transaction.categoryId] ?? '',
+          parentNames[transaction.categoryId] ?? '',
           if (transaction.channelId != null)
             channelNames[transaction.channelId] ?? '',
           transaction.amount.toString(),

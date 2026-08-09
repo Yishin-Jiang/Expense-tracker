@@ -55,3 +55,38 @@ class CategoryInput {
     }
   }
 }
+
+bool categoryMatchesType(Category category, CategoryType type) =>
+    category.type == type || category.type == CategoryType.both;
+
+bool categoryHasChildren(Category category, List<Category> categories) =>
+    categories.any((item) => item.parentId == category.id);
+
+List<Category> selectableCategories(
+  List<Category> categories,
+  CategoryType type, {
+  int? selectedId,
+}) => categories
+    .where(
+      (item) =>
+          categoryMatchesType(item, type) &&
+          ((item.isActive && !categoryHasChildren(item, categories)) ||
+              item.id == selectedId),
+    )
+    .toList(growable: false);
+
+Set<int> categoryIdsForSelection(List<Category> categories, int categoryId) {
+  final ids = <int>{categoryId};
+  var added = true;
+  while (added) {
+    added = false;
+    for (final category in categories) {
+      if (category.parentId != null &&
+          ids.contains(category.parentId) &&
+          ids.add(category.id)) {
+        added = true;
+      }
+    }
+  }
+  return ids;
+}
