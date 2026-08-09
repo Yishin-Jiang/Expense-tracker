@@ -35,18 +35,24 @@ void main() {
     expect(find.byKey(const Key('analysisDayBar-10')), findsOneWidget);
     expect(find.byKey(const Key('analysisDayBar-21')), findsOneWidget);
 
-    final lunchCategory = find.byKey(
-      Key('analysisCategory-${seeded.lunchCategoryId}'),
+    final foodCategory = find.byKey(
+      Key('analysisCategoryGroup-${seeded.foodCategoryId}'),
     );
-    await tester.ensureVisible(lunchCategory);
+    await tester.ensureVisible(foodCategory);
     await tester.pumpAndSettle();
-    expect(find.text('午餐'), findsOneWidget);
+    expect(find.text('飲食'), findsOneWidget);
     expect(find.text('50.0%'), findsWidgets);
     expect(find.text('實體店面'), findsOneWidget);
     expect(find.textContaining('30.0%・NT\$ 300'), findsOneWidget);
     expect(find.text('網購'), findsOneWidget);
     expect(find.textContaining('70.0%・NT\$ 700'), findsOneWidget);
 
+    await tester.tap(foodCategory);
+    await tester.pumpAndSettle();
+    final lunchCategory = find.byKey(
+      Key('analysisCategory-${seeded.lunchCategoryId}'),
+    );
+    expect(lunchCategory, findsOneWidget);
     await tester.tap(lunchCategory);
     await tester.pumpAndSettle();
     expect(find.text('午餐交易'), findsOneWidget);
@@ -85,13 +91,14 @@ Future<void> _pumpAnalysis(WidgetTester tester, AppDatabase database) async {
   await tester.pumpAndSettle();
 }
 
-Future<({int lunchCategoryId})> _seedAnalysisTransactions(
+Future<({int foodCategoryId, int lunchCategoryId})> _seedAnalysisTransactions(
   AppDatabase database,
 ) async {
   await database.customSelect('SELECT 1').get();
   final categories = await database.select(database.categories).get();
   final channels = await database.select(database.channels).get();
   final lunch = categories.singleWhere((item) => item.name == '午餐');
+  final food = categories.singleWhere((item) => item.name == '飲食');
   final supplies = categories.singleWhere((item) => item.name == '日用品');
   final salary = categories.singleWhere((item) => item.name == '薪資');
   final physical = channels.singleWhere(
@@ -160,5 +167,5 @@ Future<({int lunchCategoryId})> _seedAnalysisTransactions(
     note: '六月聚餐',
   );
 
-  return (lunchCategoryId: lunch.id);
+  return (foodCategoryId: food.id, lunchCategoryId: lunch.id);
 }

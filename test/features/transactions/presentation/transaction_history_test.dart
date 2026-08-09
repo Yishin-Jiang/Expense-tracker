@@ -59,7 +59,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('filterCategory')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('午餐').last);
+    await tester.tap(find.text('飲食（含子類別）'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('applyTransactionFiltersButton')));
     await tester.pumpAndSettle();

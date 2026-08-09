@@ -128,6 +128,11 @@ class _CategoryEditorState extends ConsumerState<_CategoryEditor> {
             ],
             const SizedBox(height: 20),
             Text('父類別（選填）', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 4),
+            Text(
+              '設定後，此類別會成為記帳細項；父類別只用於分析彙總。',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             const SizedBox(height: 10),
             categories.when(
               data: (items) {

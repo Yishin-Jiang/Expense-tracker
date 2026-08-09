@@ -30,7 +30,9 @@ void main() {
     expect(find.text('飲食'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('addCategoryButton')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    expect(find.text('新增類別'), findsWidgets);
+    expect(find.text('分類管理'), findsNothing);
     await tester.enterText(find.byKey(const Key('categoryNameField')), '咖啡');
     await tester.tap(find.byKey(const Key('categoryParent-expense')));
     await tester.pumpAndSettle();
@@ -101,7 +103,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('重新啟用'));
     await tester.pumpAndSettle();
-    expect(find.text('子類別'), findsWidgets);
+    expect(find.text('記帳細項'), findsWidgets);
 
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();

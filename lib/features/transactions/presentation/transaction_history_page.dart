@@ -406,7 +406,17 @@ class _TransactionFilterSheetState extends State<_TransactionFilterSheet> {
               items: [
                 const DropdownMenuItem<int?>(value: null, child: Text('全部類別')),
                 for (final item in widget.categories)
-                  DropdownMenuItem(value: item.id, child: Text(item.name)),
+                  DropdownMenuItem(
+                    value: item.id,
+                    child: Text(
+                      item.parentId == null &&
+                              categoryHasChildren(item, widget.categories)
+                          ? '${item.name}（含子類別）'
+                          : item.parentId == null
+                          ? item.name
+                          : '　${item.name}',
+                    ),
+                  ),
               ],
               onChanged: (value) => setState(() => _categoryId = value),
             ),

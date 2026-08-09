@@ -29,6 +29,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('amountField')), '120');
     await tester.tap(find.byKey(const Key('category-expense')));
     await tester.pumpAndSettle();
+    expect(find.text('飲食'), findsNothing);
     await tester.tap(find.text('午餐').last);
     await tester.pumpAndSettle();
 
@@ -48,6 +49,17 @@ void main() {
     expect(find.text('交易明細'), findsOneWidget);
     expect(find.text('− NT\$ 120'), findsOneWidget);
     expect(await database.select(database.transactions).get(), hasLength(1));
+
+    final created = await database.select(database.transactions).getSingle();
+    await tester.tap(find.text('首頁'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('transactionHistoryButton')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Key('historyTransaction-${created.id}')));
+    await tester.pump();
+    expect(find.text('交易紀錄'), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.text('交易明細'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('editTransactionButton')));
     await tester.pumpAndSettle();

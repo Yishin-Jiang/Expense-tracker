@@ -154,13 +154,11 @@ class _SubscriptionEditorState extends ConsumerState<_SubscriptionEditor> {
             const SizedBox(height: 10),
             categories.when(
               data: (items) {
-                final expenseCategories = items
-                    .where(
-                      (item) =>
-                          item.type == CategoryType.expense ||
-                          item.type == CategoryType.both,
-                    )
-                    .toList();
+                final expenseCategories = selectableCategories(
+                  items,
+                  CategoryType.expense,
+                  selectedId: editing ? _categoryId : null,
+                );
                 return DropdownButtonFormField<int>(
                   key: const Key('subscriptionCategoryField'),
                   initialValue: _categoryId,
